@@ -1,4 +1,4 @@
-# dslab1
+# dslab2
 ### Logging facility
 #### Send message to Logging facility:
 ##### If you want to send file to Logging facility, append the message using
