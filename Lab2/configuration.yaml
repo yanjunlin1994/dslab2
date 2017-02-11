@@ -1,0 +1,81 @@
+﻿# Defines which nodes are used in the system and how to connect to them.
+# All names must be unique.
+# No other nodes are known.
+# These names will be used for src and dest addresses for the Message
+# The local node’s name is included in this list
+configuration :
+- name : alice
+  ip   : 128.237.163.55
+  port : 12344
+- name : bob
+  ip   : 128.237.186.116
+  port : 14255
+- name : charlie
+  ip   : 128.237.163.55
+  port : 12998
+- name : daphnie
+  ip   : 128.237.186.116
+  port : 1987
+- name : Logger
+  ip   : 128.237.163.55
+  port : 18678
+  
+# This is the incoming port on which MP will listen
+# May be ephemeral for further communication as usual
+sendRules :
+  - action : delay # Ack message number 4 from bob to alice will not be sent
+    src    : bob
+    dest   : alice
+    kind   : Ack
+    seqNum : 2
+  - action : delay # Ack message number 4 from bob to alice will not be sent
+    src    : daphnie
+    dest   : alice
+    kind   : Ack
+    seqNum : 0
+  - action : dropAfter # Daphnie will stop sending Reply messages after seq#6
+    kind   : Reply
+    src    : daphnie
+    seqNum : 6
+  - action : delay #
+    kind   : det
+    src    : bob
+    dest   : alice
+    seqNum : 3
+  - action : duplicate #
+    dest   : bob
+    src    : charlie
+    seqNum : 7
+  - action : duplicate #
+    kind   : dup
+    src    : bob
+    dest   : alice
+    seqNum : 5
+receiveRules :
+  - action : delay # Ack message number 4 from bob to alice will not be sent
+    src    : bob
+    dest   : alice
+    kind   : Ack
+    seqNum : 2
+  - action : delay # Ack message number 4 from bob to alice will not be sent
+    src    : daphnie
+    dest   : alice
+    kind   : Ack
+    seqNum : 0
+  - action : duplicate
+    src    : charlie
+    seqNum : 3
+  - action : drop
+    src : charlie
+    seqNum : 7
+    duplicate : True
+  - action : delay
+    seqNum : 5
+    src    : daphnie
+# 4th message from Charlie that anyone
+# receives will be duplicated
+# For the 8th message from Charlie, only the
+# original will be received.  The duplicate
+# will get dropped
+# Any message from Daphnie will be delivered only
+# after some other message
