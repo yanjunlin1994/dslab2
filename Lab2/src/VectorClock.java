@@ -10,7 +10,7 @@ public class VectorClock implements ClockService {
 	public VectorClock(int size, int i){
 		times = new int[size];
 		id = i;
-		times[id] = 1;
+		times[id] = 0;
 	}
 	/**
 	 * Increments the time in its own position in array.
@@ -36,7 +36,7 @@ public class VectorClock implements ClockService {
 			times[i] = Math.max(msg.getTimeStamp(i),times[i]);
 		}
 		//increments after taking the maximum value
-		times[id]++;
+		this.times[id]++;
 		return;
 	}
 	/**
@@ -76,5 +76,14 @@ public class VectorClock implements ClockService {
 			}
 		}
 		return flag;
+	}
+	public int get_size(){
+		return this.times.length;
+	}
+	public int get_id(){
+		return this.id;
+	}
+	public String get_type(){
+		return "vector";
 	}
 }

@@ -35,5 +35,14 @@ public class LogicalClock implements ClockService {
 	public int compare(int m1, int m2) {
 		return m1 - m2;
 	}
+	public int get_size(){
+		return 1;
+	}
+	public int get_id(){
+		return 0;
+	}
+	public String get_type(){
+		return "logical";
+	}
 
 }

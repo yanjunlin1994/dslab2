@@ -45,7 +45,7 @@ public class MessagePasser {
 		this.myConfig = new Configuration(configuration_filename);
 		this.size = myConfig.get_NodeMap().keySet().size();
 		int counter = 0;
-		//TODO:
+		
 		for (String name : myConfig.get_NodeMap().keySet()) {
 			if (name.equals(local_name)){
 				this.id = counter;
@@ -60,7 +60,7 @@ public class MessagePasser {
         
 		Thread listen = new Thread(new Listener(myConfig, myName, receiveQueue, receiveDelayQueue));
 		listen.start(); 
-		Thread receive = new Thread(new Receive(receiveQueue, clockservice));
+		Thread receive = new Thread(new Receive(receiveQueue, clockservice, this.myConfig));
 		receive.start(); 
 	}
 	public void runNow(){
@@ -72,16 +72,17 @@ public class MessagePasser {
 	        newMes.set_seqNum(myConfig.getNode(newMes.get_dest()).get_seqN());
 	        myConfig.getNode(newMes.get_dest()).incre_seqN();
 	        
-	        
+	        clockservice.increment();
 	        /*send a timestamped message*/
 	        if (this.myClock.equals("vector")){
 	            newMes.setVectorMes(clockservice, this.size, this.id, myClock);
 	        } else if (this.myClock.equals("logical")) {
 	            newMes.setLogicalMes(clockservice.getTimeStamp(), myClock);
 	        }
-	        System.out.println("[runNow:new TSM]" + newMes);
-	        clockservice.increment();
+	        //System.out.println("[runNow:new TSM]" + newMes);
 	        System.out.println("check clockservice in send" + "("+ clockservice +")");
+	        
+	        
 	        if (newMes.get_log()){
 	        	sendToLog(newMes);
 	        }
@@ -150,7 +151,7 @@ public class MessagePasser {
 	 * @param data the data in message
 	 */
 	private void send(TimeStampedMessage newMes) {
-	    System.out.println("[MessagePasser class: send function]");
+	   // System.out.println("[MessagePasser class: send function]");
 	    if (newMes == null) {
 	        System.out.println("Message is empty, can't send it");
 	        return;
@@ -159,14 +160,14 @@ public class MessagePasser {
         os = myConfig.get_OSMap(newMes.get_dest());
         if (os != null) {
             try {
-                System.out.println("[MessagePasser class: send function: using exsiting output stream.]");
-                System.out.println("message to be send is:" + newMes);
+                //System.out.println("[MessagePasser class: send function: using exsiting output stream.]");
+                //System.out.println("message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("[MessagePasser class: send function: create new output stream...]");
+            //System.out.println("[MessagePasser class: send function: create new output stream...]");
             Node me = myConfig.getNode(myName);
             Node he = myConfig.getNode(newMes.get_dest());
             Socket sck = null;
@@ -176,7 +177,7 @@ public class MessagePasser {
                 System.out.println("succeed");
                 os = new ObjectOutputStream(sck.getOutputStream());
                 myConfig.add_OSMap(newMes.get_dest(), os);
-                System.out.println("message to be send is:" + newMes);
+                //System.out.println("message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 if (sck != null) {
