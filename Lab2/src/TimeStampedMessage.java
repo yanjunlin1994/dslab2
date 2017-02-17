@@ -158,7 +158,7 @@ public class TimeStampedMessage extends Message implements Serializable{
     	this.groupName = gn;
     }
     public String getGroupName(){
-    	this.groupName;
+    	return this.groupName;
     }
 	/**
 	 * compare method.
@@ -266,8 +266,11 @@ public class TimeStampedMessage extends Message implements Serializable{
 			return false;
 		}
 		for (int i = 0; i< size;i++){
-			
+			if (this.getTimeStamp(i)!=t.getTimeStamp(i)){
+				return false;
+			}
 		}
+		return true;
 	}
 
 }
