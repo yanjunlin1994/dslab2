@@ -13,15 +13,10 @@ import java.util.Queue;
  * @author Team 3
  */
 public class MessagePasser {
-	/** MessagePasser's configuration object. */
 	private Configuration myConfig;
-	/** MessagePasser's local name. */
 	private String myName;
-	/** MessagePasser's send queue. */
 	private Queue<TimeStampedMessage> sendDelayQueue;
-	/** MessagePasser's receive queue. */
 	private Queue<TimeStampedMessage> receiveQueue;
-	/** MessagePasser's receive delay queue. */
     private Queue<TimeStampedMessage> receiveDelayQueue;
     /*Clock type for this process can be logical or vector*/
     private String myClock;
@@ -29,12 +24,14 @@ public class MessagePasser {
     private ClockService clockservice;
     /*number of nodes in the system*/
     private int size;
+    /* my id (define the position in vector clock */
     private int id;
 	/**
 	 * MessagePasser constructor.
-	 * initialize local name,
+	 * initialize local name, clock name
 	 * send queue, receive queue， receive delay queue and configuration file.
 	 * start listening on a new thread.
+	 * start receiving on a new thread.
 	 */
 	public MessagePasser(String configuration_filename, String local_name, String clock_name) {
 	    this.myName = local_name;
@@ -45,7 +42,7 @@ public class MessagePasser {
 		this.myConfig = new Configuration(configuration_filename);
 		this.size = myConfig.get_NodeMap().keySet().size();
 		int counter = 0;
-		
+		//get my id
 		for (String name : myConfig.get_NodeMap().keySet()) {
 			if (name.equals(local_name)){
 				this.id = counter;
@@ -63,6 +60,9 @@ public class MessagePasser {
 		Thread receive = new Thread(new Receive(receiveQueue, clockservice, this.myConfig));
 		receive.start(); 
 	}
+	
+	
+	
 	public void runNow(){
 	    while(true) {	    	
 	        TimeStampedMessage newMes = this.enterParameter(myName);

@@ -20,13 +20,15 @@ public class TimeStampedMessage extends Message implements Serializable{
 	/* my index in array */
 	private int id;
 	private boolean ifLog;
+	private boolean ifmulc;
 	
 	/**
 	 * Constructor using Message class's contructor.
 	 */
-	public TimeStampedMessage(String s,String d,String k,Object data, boolean isl) {
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean isl, boolean ifm) {
 		super(s, d, k, data);
 		this.ifLog = isl;
+		this.ifmulc = ifm;
 	}
 	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl) {
         super(s, d, k, data, dup, sn);
