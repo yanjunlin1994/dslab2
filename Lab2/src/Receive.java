@@ -43,8 +43,8 @@ public class Receive implements Runnable{
             this.clockservice.Synchronize(msg);
             if (msg.get_log()){
             	TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
-            			"received msg","received data");
-            	toLogMessage.set_log("T");
+            			"received msg","received data", true);
+//            	toLogMessage.set_log(true);
             	toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
             	sendToLog(msg);
             }
