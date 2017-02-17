@@ -21,6 +21,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	private int id;
 	private boolean ifLog;
 	private boolean ifmulc;
+	private String groupName;
 	
 	/**
 	 * Constructor using Message class's contructor.
@@ -81,9 +82,15 @@ public class TimeStampedMessage extends Message implements Serializable{
 		
 		return;
 	}
+	public int getSize(){
+		return this.size;
+	}
 	public void setId(int i){
 		this.id = i;
 		return;
+	}
+	public int getId(){
+		return this.id;
 	}
 	/**
 	 * vector timestamp setter.
@@ -141,6 +148,18 @@ public class TimeStampedMessage extends Message implements Serializable{
     public boolean get_log(){
         return ifLog;
     }
+    public void set_mult(boolean m){
+    	this.ifmulc = m;
+    }
+    public boolean get_mult(){
+    	return this.ifmulc;
+    }
+    public void setGroupName(String gn){
+    	this.groupName = gn;
+    }
+    public String getGroupName(){
+    	this.groupName;
+    }
 	/**
 	 * compare method.
 	 */
@@ -195,5 +214,60 @@ public class TimeStampedMessage extends Message implements Serializable{
         }
         return cl;
     }
+	public boolean equals(TimeStampedMessage t){
+	/*    
+		private int timeStamp;
+		
+		
+		private int[] timeStamps;
+		
+		private String clock_type;
+	
+		private int size;
+		
+		private int id;
+		private boolean ifLog;
+		private boolean ifmulc;
+	*/
+		if (!this.get_source().equals(t.get_source())){
+			return false;
+		}
+		if (!this.get_dest().equals(t.get_dest())){
+			return false;
+		}
+		if (!this.get_kind().equals(t.get_kind())){
+			return false;
+		}
+		if (!this.get_payload().equals(t.get_payload())){
+			return false;
+		}
+		if (this.timeStamp != t.getTimeStamp()){
+			return false;
+		}
+		if (!this.clock_type.equals(t.getType())){
+			return false;
+		}
+		if (this.get_log()!=t.get_log()){
+			return false;
+		}
+		if (this.get_seqNum()!= t.get_seqNum()){
+			return false;
+		}
+		if (this.get_duplicate()!= t.get_duplicate()){
+			return false;
+		}
+		if (this.ifmulc != t.get_mult()){
+			return false;
+		}
+		if (this.size != t.getSize()){
+			return false;
+		}
+		if (this.id != t.getId()){
+			return false;
+		}
+		for (int i = 0; i< size;i++){
+			
+		}
+	}
 
 }
