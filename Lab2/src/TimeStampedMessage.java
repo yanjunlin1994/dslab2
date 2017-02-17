@@ -31,7 +31,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 		this.ifLog = isl;
 		this.ifmulc = ifm;
 	}
-	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl) {
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl,boolean ifm) {
         super(s, d, k, data, dup, sn);
         this.ifLog = isl;
     }
@@ -204,8 +204,24 @@ public class TimeStampedMessage extends Message implements Serializable{
     }
 	
 	public TimeStampedMessage clone(){
+	
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), false);
+	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), this.ifLog,this.ifmulc);
+	    
+	            //clone message will not be send to log
+        if (this.clock_type.equals("logical")) {
+            cl.setLogicalMes(this.timeStamp, this.clock_type);
+        } else if (this.clock_type.equals("vector")) {
+            cl.setVectorMesCopy(this.timeStamps, this.size, this.id, this.clock_type);
+        }
+        return cl;
+    }
+	public TimeStampedMessage cloneMultiCast(){
+		
+	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
+	            this.get_kind(), this.get_payload(), false, this.get_seqNum(), this.ifLog,this.ifmulc);
+	    cl.setGroupName(this.groupName);
+	    
 	            //clone message will not be send to log
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
