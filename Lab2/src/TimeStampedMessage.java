@@ -21,6 +21,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	private int id;
 	private boolean ifLog;
 	private boolean ifmulc;
+	private String groupName;
 	
 	/**
 	 * Constructor using Message class's contructor.
@@ -30,7 +31,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 		this.ifLog = isl;
 		this.ifmulc = ifm;
 	}
-	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl) {
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl,boolean ifm) {
         super(s, d, k, data, dup, sn);
         this.ifLog = isl;
     }
@@ -81,9 +82,15 @@ public class TimeStampedMessage extends Message implements Serializable{
 		
 		return;
 	}
+	public int getSize(){
+		return this.size;
+	}
 	public void setId(int i){
 		this.id = i;
 		return;
+	}
+	public int getId(){
+		return this.id;
 	}
 	/**
 	 * vector timestamp setter.
@@ -141,6 +148,18 @@ public class TimeStampedMessage extends Message implements Serializable{
     public boolean get_log(){
         return ifLog;
     }
+    public void set_mult(boolean m){
+    	this.ifmulc = m;
+    }
+    public boolean get_mult(){
+    	return this.ifmulc;
+    }
+    public void setGroupName(String gn){
+    	this.groupName = gn;
+    }
+    public String getGroupName(){
+    	return this.groupName;
+    }
 	/**
 	 * compare method.
 	 */
@@ -185,8 +204,10 @@ public class TimeStampedMessage extends Message implements Serializable{
     }
 	
 	public TimeStampedMessage clone(){
+	
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), false);
+	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), this.ifLog,this.ifmulc);
+	    
 	            //clone message will not be send to log
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
@@ -195,5 +216,77 @@ public class TimeStampedMessage extends Message implements Serializable{
         }
         return cl;
     }
+	public TimeStampedMessage cloneMultiCast(){
+		
+	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
+	            this.get_kind(), this.get_payload(), false, this.get_seqNum(), this.ifLog,this.ifmulc);
+	    cl.setGroupName(this.groupName);
+	    
+	            //clone message will not be send to log
+        if (this.clock_type.equals("logical")) {
+            cl.setLogicalMes(this.timeStamp, this.clock_type);
+        } else if (this.clock_type.equals("vector")) {
+            cl.setVectorMesCopy(this.timeStamps, this.size, this.id, this.clock_type);
+        }
+        return cl;
+    }
+	public boolean equals(TimeStampedMessage t){
+	/*    
+		private int timeStamp;
+		
+		
+		private int[] timeStamps;
+		
+		private String clock_type;
+	
+		private int size;
+		
+		private int id;
+		private boolean ifLog;
+		private boolean ifmulc;
+	*/
+		if (!this.get_source().equals(t.get_source())){
+			return false;
+		}
+		if (!this.get_dest().equals(t.get_dest())){
+			return false;
+		}
+		if (!this.get_kind().equals(t.get_kind())){
+			return false;
+		}
+		if (!this.get_payload().equals(t.get_payload())){
+			return false;
+		}
+		if (this.timeStamp != t.getTimeStamp()){
+			return false;
+		}
+		if (!this.clock_type.equals(t.getType())){
+			return false;
+		}
+		if (this.get_log()!=t.get_log()){
+			return false;
+		}
+		if (this.get_seqNum()!= t.get_seqNum()){
+			return false;
+		}
+		if (this.get_duplicate()!= t.get_duplicate()){
+			return false;
+		}
+		if (this.ifmulc != t.get_mult()){
+			return false;
+		}
+		if (this.size != t.getSize()){
+			return false;
+		}
+		if (this.id != t.getId()){
+			return false;
+		}
+		for (int i = 0; i< size;i++){
+			if (this.getTimeStamp(i)!=t.getTimeStamp(i)){
+				return false;
+			}
+		}
+		return true;
+	}
 
 }
