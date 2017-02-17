@@ -33,5 +33,8 @@ public class Group {
         }
         return null;
     }
+    public ArrayList<Node> getMembers() {
+        return this.members;
+    }
 
 }

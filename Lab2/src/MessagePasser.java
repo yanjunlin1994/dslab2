@@ -69,11 +69,12 @@ public class MessagePasser {
 	        if (newMes == null) {
 	            continue;
 	        }
+	        /* deal with node's sequence number */
 	        newMes.set_seqNum(myConfig.getNode(newMes.get_dest()).get_seqN());
 	        myConfig.getNode(newMes.get_dest()).incre_seqN();
-	        
+	        /* increment my clock */
 	        clockservice.increment();
-	        /*send a timestamped message*/
+	        /* send a timestamped message*/
 	        if (this.myClock.equals("vector")){
 	            newMes.setVectorMes(clockservice, this.size, this.id, myClock);
 	        } else if (this.myClock.equals("logical")) {
@@ -86,32 +87,69 @@ public class MessagePasser {
 	        if (newMes.get_log()){
 	        	sendToLog(newMes);
 	        }
-		    String checkResult = check(newMes); 
-		    if (checkResult != null) {
-		        if (checkResult.equals("drop")) {
-		            continue;
-		        } else if (checkResult.equals("duplicate")) {
-		            TimeStampedMessage clone = newMes.clone();
-		            send(newMes);
-		            send(clone);
-		            while (!sendDelayQueue.isEmpty()){
-		                TimeStampedMessage msg = sendDelayQueue.poll();
-		            	send(msg);
-		            }
-		        } else if (checkResult.equals("delay")){
-		            sendDelayQueue.offer(newMes);   
-		        } else {
-		            System.out.println("[ATTENTION]abnormal checkResult" + checkResult); 
-		        }
-		    }
-		    else {
-		        //send directly
-		    	send(newMes);
-	            while (!sendDelayQueue.isEmpty()){
-	            	TimeStampedMessage msg = sendDelayQueue.poll();
-	            	send(msg);
+	        if (newMes.get_mult()) {
+	            Group sendGroup = myConfig.groupMap.get(newMes.getGroupName());
+	            for (Node a: sendGroup.getMembers()) {
+	                TimeStampedMessage multicastMes = newMes.cloneMultiCast();
+	                multicastMes.set_dest(a.get_name());
+	                String checkResult = check(multicastMes); 
+	                if (checkResult != null) {
+	                    if (checkResult.equals("drop")) {
+	                        continue;
+	                    } else if (checkResult.equals("duplicate")) {
+	                        TimeStampedMessage clone = multicastMes.clone();
+	                        send(multicastMes);
+	                        send(clone);
+	                        while (!sendDelayQueue.isEmpty()){
+	                            TimeStampedMessage msg = sendDelayQueue.poll();
+	                            send(msg);
+	                        }
+	                    } else if (checkResult.equals("delay")){
+	                        sendDelayQueue.offer(multicastMes);   
+	                    } else {
+	                        System.out.println("[ATTENTION]abnormal checkResult" + checkResult); 
+	                    }
+	                }
+	                else {
+	                    //send directly
+	                    send(multicastMes);
+	                    while (!sendDelayQueue.isEmpty()){
+	                        TimeStampedMessage msg = sendDelayQueue.poll();
+	                        send(msg);
+	                    }
+	                }   
+	                
+	                
 	            }
-		    }
+	            
+	        } else {
+	            String checkResult = check(newMes); 
+	            if (checkResult != null) {
+	                if (checkResult.equals("drop")) {
+	                    continue;
+	                } else if (checkResult.equals("duplicate")) {
+	                    TimeStampedMessage clone = newMes.clone();
+	                    send(newMes);
+	                    send(clone);
+	                    while (!sendDelayQueue.isEmpty()){
+	                        TimeStampedMessage msg = sendDelayQueue.poll();
+	                        send(msg);
+	                    }
+	                } else if (checkResult.equals("delay")){
+	                    sendDelayQueue.offer(newMes);   
+	                } else {
+	                    System.out.println("[ATTENTION]abnormal checkResult" + checkResult); 
+	                }
+	            }
+	            else {
+	                //send directly
+	                send(newMes);
+	                while (!sendDelayQueue.isEmpty()){
+	                    TimeStampedMessage msg = sendDelayQueue.poll();
+	                    send(msg);
+	                }
+	            }   
+	        } 
 	    }
 	}
 	
@@ -182,7 +220,6 @@ public class MessagePasser {
         if (os == null) {
             Socket sck = null;
             try {
-                //TODO:load the log information in configuration
             	String log_IP = myConfig.getLogger().get_ip();
             	int log_port = myConfig.getLogger().get_port();
                 sck = new Socket(log_IP,log_port);
@@ -191,13 +228,10 @@ public class MessagePasser {
                 os.writeObject(newMes);
             } catch (IOException e) {
                 if (sck != null) {
-                    try {
-                    	
+                    try {            	
                         System.out.println("set the log os to null");
                         os.close();
                         myConfig.set_LoggerOS(null);
-                        
-//                        sck.close();
                     } catch (Exception nestedE) {
                         nestedE.printStackTrace();   
                     }
@@ -243,9 +277,7 @@ public class MessagePasser {
      * @return the message constructed from input parameters.
      */
     private TimeStampedMessage enterParameter(String localName) {
-        System.out.println("Enter destination, "
-                + "message kind, message content, whether log and whether multicast. "
-                + "seperate them with slash :)");
+        System.out.println("destination/kind/content/iflog/ifmulticast");
         InputStreamReader isrd = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(isrd);
         String[] inputParam = null;
@@ -254,7 +286,7 @@ public class MessagePasser {
             inputParam = temp.split("/");
             if (inputParam.length < 5) {
                 //wrong input
-                System.out.println("oops, illegal input.");
+                System.out.println("illegal input");
                 return null;
             }
         } catch(Exception e) {
@@ -262,7 +294,12 @@ public class MessagePasser {
         }   
         try {
             TimeStampedMessage newM = new TimeStampedMessage(localName, inputParam[0],
-                    inputParam[1], inputParam[2], inputParam[3].equals("T")? true:false);
+                    inputParam[1], inputParam[2],
+                    inputParam[3].equals("T")? true:false,
+                    inputParam[4].equals("T")? true:false);
+            if (inputParam[4].equals("T")) {
+                newM.setGroupName(inputParam[0]);
+            }
             return newM;
         } catch(Exception e) {
             e.printStackTrace();
