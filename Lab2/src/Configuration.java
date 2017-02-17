@@ -49,6 +49,17 @@ public class Configuration {
 			
 		}
 		//TODO:
+		List<HashMap<String,Object>> groups = (List<HashMap<String,Object>>) data.get("configuration");
+		for (HashMap<String, Object> group : groups){
+			String groupName = (String)group.get("name")
+			Group newGroup = new Group(groupName);
+			List<String> members = (List<String>)group.get("members");
+			for (String name : members){
+				Node node = nodeMap.get(name);
+				newGroup.addMember(node);
+			}
+			groupMap.put(groupName,newGroup);
+		}
 		
 		List<HashMap<String, Object>> sRules = (List<HashMap<String, Object>> )data.get("sendRules");
 		for (HashMap<String,Object> rule : sRules){
