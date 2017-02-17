@@ -9,8 +9,9 @@ import java.util.*;
  */
 public class GroupMessage extends TimeStampedMessage implements Serializable{
     
-    public GroupMessage (String s,String d,String k,Object data) {
+    public GroupMessage (String s,String d,String k,Object data, boolean isl, ) {
         super(s, d, k, data);
+        TimeStampedMessage(String s,String d,String k,Object data, boolean isl) 
         this.ifLog = false;
     }
     

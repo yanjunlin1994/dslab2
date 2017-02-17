@@ -2,7 +2,6 @@ import java.util.ArrayList;
 
 public class Group {
     private String gname;
-    private int size;
     private ArrayList<Node> members;
     public Group(String n) {
         this.gname = n;
@@ -17,11 +16,8 @@ public class Group {
      * update the size of group.
      * according to the number of members in the group.
      */
-    public void updateSize() {
-        this.size = members.size();
-    }
     public int getSize() {
-        return this.size;
+        return this.members.size();
     }
     public String getName() {
         return this.gname;
