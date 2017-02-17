@@ -24,13 +24,13 @@ public class TimeStampedMessage extends Message implements Serializable{
 	/**
 	 * Constructor using Message class's contructor.
 	 */
-	public TimeStampedMessage(String s,String d,String k,Object data) {
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean isl) {
 		super(s, d, k, data);
-		this.ifLog = false;
+		this.ifLog = isl;
 	}
-	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn) {
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl) {
         super(s, d, k, data, dup, sn);
-        this.ifLog = false;
+        this.ifLog = isl;
     }
 	public void setLogicalMes(int st, String ct) {
 	    this.timeStamp = st;
@@ -49,8 +49,13 @@ public class TimeStampedMessage extends Message implements Serializable{
 	        for (int i = 0; i < this.size; i++) {
 	            this.timeStamps[i] = csv.getTimeStamp(i);
 	        }
-	    }
-	    
+	    }    
+    }
+	public void setVectorMesCopy(int[] times, int sz, int ID, String ct) {
+        this.size = sz;
+        this.id = ID;
+        this.clock_type = ct;
+        this.timeStamps = times.clone();
     }
 	/**
 	 * set the type either vector or logical.
@@ -128,10 +133,8 @@ public class TimeStampedMessage extends Message implements Serializable{
 	public int[] getTimeStamps(){
 		return timeStamps;
 	}
-	public void set_log(String t){
-        if (t.equals("T")){
-            this.ifLog = true;
-        }
+	public void set_log(boolean ifl){
+        this.ifLog = ifl;
     }
     public boolean get_log(){
         return ifLog;
@@ -181,18 +184,14 @@ public class TimeStampedMessage extends Message implements Serializable{
 	
 	public TimeStampedMessage clone(){
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), true, this.get_seqNum());
+	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), false);
+	            //clone message will not be send to log
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {
-            cl.setSize(this.size);
-            cl.setId(this.id);
-            cl.setType(this.clock_type);
-            cl.timeStamps = this.timeStamps.clone();
+            cl.setVectorMesCopy(this.timeStamps, this.size, this.id, this.clock_type);
         }
         return cl;
     }
-
-	
 
 }

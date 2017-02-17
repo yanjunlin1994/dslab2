@@ -20,6 +20,8 @@ public class Configuration {
 	ArrayList<Rule> receiveRules = new ArrayList<Rule>();
 	HashMap<String,Node> nodeMap = new HashMap<String,Node>();
 	HashMap<String,ObjectOutputStream> OSMap = new HashMap<String,ObjectOutputStream>();
+	//TODO:
+	HashMap<String, Group> groupMap = new HashMap<String, Group>();
 	ObjectOutputStream LoggerOS;
 	Node lgr = null;
 	/**
@@ -42,11 +44,12 @@ public class Configuration {
 			                       (String)node.get("ip"));
 			if (newNode.get_name().equals("Logger")) {
 			    this.lgr = newNode;
-			} else {
-			    nodeMap.put((String)node.get("name"),newNode);
-			}
+			} 
+			nodeMap.put((String)node.get("name"),newNode);	
 			
 		}
+		//TODO:
+		
 		List<HashMap<String, Object>> sRules = (List<HashMap<String, Object>> )data.get("sendRules");
 		for (HashMap<String,Object> rule : sRules){
 			Rule newRule = new Rule();

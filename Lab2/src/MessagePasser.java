@@ -114,36 +114,7 @@ public class MessagePasser {
 		    }
 	    }
 	}
-	/**
-     * Construct the message from input parameters.
-     * @return the message constructed from input parameters.
-     */
-	private TimeStampedMessage enterParameter(String localName) {
-        System.out.println("Enter destination, "
-                + "message kind and the message content, seperate them with slash :)");
-        InputStreamReader isrd = new InputStreamReader(System.in);
-        BufferedReader br = new BufferedReader(isrd);
-        String[] inputParam = null;
-        try {
-            String temp = br.readLine();
-            inputParam = temp.split("/");
-            if (inputParam.length < 4) {
-                //wrong input
-                System.out.println("oops, illegal input.");
-                return null;
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }   
-        try {
-            TimeStampedMessage newM = new TimeStampedMessage(localName, inputParam[0], inputParam[1], inputParam[2]);
-            newM.set_log(inputParam[3]);
-            return newM;
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	
 	/**
 	 * Send message to a particular destination.
 	 * @param dest destination
@@ -267,4 +238,35 @@ public class MessagePasser {
 	public int getId(){
 		return this.id;
 	}
+	/**
+     * Construct the message from input parameters.
+     * @return the message constructed from input parameters.
+     */
+    private TimeStampedMessage enterParameter(String localName) {
+        System.out.println("Enter destination, "
+                + "message kind, message content, whether log and whether multicast. "
+                + "seperate them with slash :)");
+        InputStreamReader isrd = new InputStreamReader(System.in);
+        BufferedReader br = new BufferedReader(isrd);
+        String[] inputParam = null;
+        try {
+            String temp = br.readLine();
+            inputParam = temp.split("/");
+            if (inputParam.length < 5) {
+                //wrong input
+                System.out.println("oops, illegal input.");
+                return null;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }   
+        try {
+            TimeStampedMessage newM = new TimeStampedMessage(localName, inputParam[0],
+                    inputParam[1], inputParam[2], inputParam[3].equals("T")? true:false);
+            return newM;
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
