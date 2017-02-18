@@ -73,6 +73,11 @@ public class Group {
     	int size = holdbackQ.size();
     	for (int i = 0; i<size;i++){
     		TimeStampedMessage msg = holdbackQ.poll();
+    		int[] msg_time = msg.getTimeStamps();
+    		if (msg.getGroupMessageOrigin().equals(myname)){
+    			if (groupClock.getTimeStamp(myid))
+    		}
+    		
     		if ()
     	}
     	return null;
