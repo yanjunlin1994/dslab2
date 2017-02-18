@@ -129,6 +129,9 @@ public class Configuration {
 	}
 	public Node getLogger(){
         return this.lgr;
+	}
+	public HashMap<String,Group> get_groupMap(){
+        return this.groupMap;
     }
 	public HashMap<String,Group> get_GroupMap(){
 		return this.groupMap;

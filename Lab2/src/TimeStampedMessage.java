@@ -8,6 +8,22 @@ import java.util.*;
  *
  */
 public class TimeStampedMessage extends Message implements Serializable{
+/* list of the variables in TimeTampedMessage class
+ *    private String source;
+      private String dest;
+      private String kind;
+      private Object payload;  
+      private int seqNum;
+      private boolean duplicate;
+      private int timeStamp;
+      private int[] timeStamps;
+      private String clock_type;
+      private int size;
+      private int id;
+      private boolean ifLog;
+      private boolean ifmulc;
+      private String groupName;
+    */
     /* logical timeStamp. */
 	private int timeStamp;
 	
@@ -205,11 +221,11 @@ public class TimeStampedMessage extends Message implements Serializable{
     }
 	
 	public TimeStampedMessage clone(){
-	
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
 	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), this.ifLog,this.ifmulc);
-	    
-	            //clone message will not be send to log
+	    if (this.getGroupName() != null) {
+	        cl.setGroupName(this.groupName);
+	    }
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {
@@ -222,8 +238,6 @@ public class TimeStampedMessage extends Message implements Serializable{
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
 	            this.get_kind(), this.get_payload(), false, this.get_seqNum(), this.ifLog,this.ifmulc);
 	    cl.setGroupName(this.groupName);
-	    
-	            //clone message will not be send to log
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {

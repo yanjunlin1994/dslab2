@@ -41,11 +41,17 @@ public class Receive implements Runnable{
         if (!receiveQueue.isEmpty()){
             msg = receiveQueue.poll();
             this.clockservice.Synchronize(msg);
+<<<<<<< HEAD
             if (msg.get_log()){
 
             	TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
             			"received msg","received data", true,msg.get_mult());
 
+=======
+            if (msg.get_log()){
+                TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
+                        "received msg","received data", true, msg.get_mult());
+>>>>>>> origin/master
 //            	toLogMessage.set_log(true);
             	toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
             	sendToLog(msg);

@@ -1,8 +1,11 @@
 import java.util.ArrayList;
-
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Queue;
 public class Group {
     private String gname;
+    private String myname;
     private ArrayList<Node> members;
+    public Queue<TimeStampedMessage> holdbackQ = new LinkedBlockingQueue<>();
     public Group(String n) {
         this.gname = n;
         this.members = new ArrayList<Node>();
@@ -35,6 +38,10 @@ public class Group {
     }
     public ArrayList<Node> getMembers() {
         return this.members;
+    }
+    public void addToHoldBackQ(TimeStampedMessage mes) {
+        this.holdbackQ.offer(mes);
+        
     }
 
 }
