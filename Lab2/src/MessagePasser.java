@@ -42,16 +42,17 @@ public class MessagePasser {
         this.receivedSet = new HashSet<TimeStampedMessage>();
         this.myConfig = new Configuration(configuration_filename);
         this.size = myConfig.get_NodeMap().keySet().size();
-        System.out.println("I am " + this.myName + ", my ID is: " + myConfig.get_NodeMap().get(this.myName).get_nodeID());
+        this.id = myConfig.get_NodeMap().get(this.myName).get_nodeID();
+        System.out.println("I am " + this.myName + ", my ID is: " + this.id);
         
         /* Use the clock factory to generate clock service. */
         ClockFactory factory = new ClockFactory(this);
         this.clockservice = factory.getClockService();
         ArrayList<Group> groups = myConfig.getGroups(myName);
         for (Group group : groups){
-        	group.setClock(clockservice);
-        	group.setMyname(myName);
-        	group.setMyID(id);
+        	group.setClock(this.clockservice);
+        	group.setMyname(this.myName);
+        	group.setMyID(this.id);
         }
         Thread listen = new Thread(new Listener(myConfig, myName, receiveQueue, receiveDelayQueue));
         listen.start(); 
@@ -187,6 +188,7 @@ public class MessagePasser {
      * @param nm
      */
     public void b_multicast(TimeStampedMessage nm) {
+        
         Group sendGroup = myConfig.groupMap.get(nm.getGroupName());
         for (Node a: sendGroup.getMembers()) {
             /* clone message and set correct destination */
