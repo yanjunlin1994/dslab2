@@ -136,4 +136,15 @@ public class Configuration {
 	public HashMap<String,Group> get_GroupMap(){
 		return this.groupMap;
 	}
+	public ArrayList<Group> getGroups(String name){
+		HashMap<String,Group> groupMap = this.get_groupMap();
+		ArrayList<Group> result = new ArrayList<Group>();
+		
+		for (Map.Entry<String, Group> entry : groupMap.entrySet()){
+			if (entry.getValue().hasMember(name)){
+				result.add(entry.getValue());
+			}
+		}
+		return result;
+	}
 }
