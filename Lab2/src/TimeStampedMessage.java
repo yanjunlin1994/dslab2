@@ -23,6 +23,7 @@ public class TimeStampedMessage extends Message implements Serializable{
       private boolean ifLog;
       private boolean ifmulc;
       private String groupName;
+      private String groupMessageOrigin;
     */
     /* logical timeStamp. */
 	private int timeStamp;
@@ -38,6 +39,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	private boolean ifLog;
 	private boolean ifmulc;
 	private String groupName;
+	private String groupMessageOrigin;
 	
 	/**
 	 * Constructor using Message class's contructor.
@@ -95,8 +97,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 		return this.clock_type;
 	}
 	public void setSize(int s){
-		this.size = s;
-		
+		this.size = s;	
 		return;
 	}
 	public int getSize(){
@@ -109,73 +110,111 @@ public class TimeStampedMessage extends Message implements Serializable{
 	public int getId(){
 		return this.id;
 	}
-	/**
-	 * vector timestamp setter.
-	 * Sets the time t in corresponding position i.
-	 * @param t timestamp
-	 * @param i index
-	 */
-	public void setTimeStamp(int t, int i){
-		if(clock_type.equals("vector")){
-			this.timeStamps[i] = t;
-		} else {
-		    throw new RuntimeException("error in TimeStampedMessage's setTimeStamp");
-		}
+	//-----------wrapper getter
+	public int getMyTimeStamp() {
+	    if(clock_type.equals("logical")) {
+	        return this.getLogicalTimeStamp();
+	    } else if (clock_type.equals("vector")) {
+	        return this.getMyVectorTimeStamp();
+	    } else {
+	        throw new RuntimeException("error in TimeStampedMessage's getTimeStamp() class");
+	    }
 	}
-	/**
-     * vector timestamp getter by specific index.
-     */
-	public int getTimeStamp(int i){
-	    if(clock_type.equals("vector")){
-	        return timeStamps[i];
-        } else {
-            throw new RuntimeException("error in TimeStampedMessage's getTimeStamp");
-        } 
-    }
+	//------------logical clock------------
 	/**
 	 * logical timestamp setter.
 	 */
-	public void setTimeStamp(int t){
+	public void setLogicalTimeStamp(int t){
 	    if(clock_type.equals("logical")){
 	        this.timeStamp = t;
         } else {
-            throw new RuntimeException("error in TimeStampedMessage's setTimeStamp class");
+            throw new RuntimeException("error in TimeStampedMessage's setLogicalTimeStamp class");
         }
 	}
 	/**
      * logical timestamp getter.
      */
-	public int getTimeStamp(){
+	public int getLogicalTimeStamp(){
 	    if(clock_type.equals("logical")){
 	        return this.timeStamp;
         } else {
-            throw new RuntimeException("error in TimeStampedMessage's setTimeStamp class");
+            throw new RuntimeException("error in TimeStampedMessage's getLogicalTimeStamp() class");
         }
 	}
+	//------------vector clock------------
 	/**
 	 * get the whole array of time stamp.
 	 * @return
 	 */
-	public int[] getTimeStamps(){
-		return timeStamps;
+	public int[] getVectorTimeStamps(){
+	    if(clock_type.equals("vector")){
+	        return this.timeStamps;
+	    } else {
+	        throw new RuntimeException("error in TimeStampedMessage's getVectorTimeStamps() class");
+	    }	
 	}
+	/**
+     * vector timestamp getter by specific index.
+     */
+    public int getMyVectorTimeStamp(){
+        if(clock_type.equals("vector")){
+            return this.timeStamps[this.id];
+        } else {
+            throw new RuntimeException("error in TimeStampedMessage's getMyVectorTimeStamp()");
+        } 
+    }
+	/**
+     * vector timestamp getter by specific index.
+     */
+    public int getVectorTimeStamp(int i){
+        if(clock_type.equals("vector")){
+            return this.timeStamps[i];
+        } else {
+            throw new RuntimeException("error in TimeStampedMessage's getVectorTimeStamp");
+        } 
+    }
+    /**
+     * vector timestamp setter.
+     * Sets the time t in corresponding position i.
+     * @param t timestamp
+     * @param i index
+     */
+    public void setVectorTimeStamp(int i, int t){
+        if(clock_type.equals("vector")){
+            this.timeStamps[i] = t;
+        } else {
+            throw new RuntimeException("error in TimeStampedMessage's setVectorTimeStamp");
+        }
+    }
+	//--------------log flag--------------
 	public void set_log(boolean ifl){
         this.ifLog = ifl;
     }
     public boolean get_log(){
-        return ifLog;
+        return this.ifLog;
     }
-    public void set_mult(boolean m){
-    	this.ifmulc = m;
-    }
-    public boolean get_mult(){
-    	return this.ifmulc;
+    //---------------group-----------------
+    public void setGroupNameAndGroupMessageOrigin(String gn, String gmo) {
+        setGroupName(gn);
+        setGroupMessageOrigin(gmo);
     }
     public void setGroupName(String gn){
     	this.groupName = gn;
     }
     public String getGroupName(){
     	return this.groupName;
+    }
+    public void setGroupMessageOrigin(String gmo){
+        this.groupMessageOrigin = gmo;
+    }
+    public String getGroupMessageOrigin(){
+        return this.groupMessageOrigin;
+    }
+    public void set_mult(boolean m){
+        this.ifmulc = m;
+    }
+    public boolean get_mult(){
+        return this.ifmulc;
     }
 	/**
 	 * compare method.
@@ -185,8 +224,8 @@ public class TimeStampedMessage extends Message implements Serializable{
 		    throw new RuntimeException("two message type different");
 		}
 		if (msg1.getType().equals("vector")) {
-			int[] m1 = msg1.getTimeStamps();
-			int[] m2 = msg2.getTimeStamps();
+			int[] m1 = msg1.getVectorTimeStamps();
+			int[] m2 = msg2.getVectorTimeStamps();
 			int flag = 0;
 			for (int i = 0; i < m1.length; i++){
 				if(flag == 1 && m1[i] < m2[i]) {
@@ -195,7 +234,6 @@ public class TimeStampedMessage extends Message implements Serializable{
 				if(flag == -1 && m1[i] > m2[i]) {
 				    return 0;
 				}
-				
 				if(flag == 0 && m1[i] < m2[i]) {
 					flag = -1;
 				} else if (flag == 0 && m1[i] > m2[i]){
@@ -205,14 +243,17 @@ public class TimeStampedMessage extends Message implements Serializable{
 			return flag;
 		}
 		else {
-			int m1 = msg1.getTimeStamp();
-			int m2 = msg2.getTimeStamp();
+			int m1 = msg1.getLogicalTimeStamp();
+			int m2 = msg2.getLogicalTimeStamp();
 			return m1 - m2;
 		}
 	}
 	public String toString() { 
         return  "[clock type:" +  this.clock_type + "]" 
                 + "[ifLog:" +  this.ifLog + "]" 
+                + "[ifmultc:" +  this.ifmulc + "]" 
+                + "[Groupname:" +  this.groupName + "]"  
+                + "[Group message origin:" +  this.groupName + "]" 
                 + "[time stamp:"
                 + (this.clock_type.equals("logical") ? this.timeStamp : Arrays.toString(timeStamps))
                 + "]"
@@ -236,7 +277,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	public TimeStampedMessage cloneMultiCast(){
 		
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), false, this.get_seqNum(), this.ifLog,this.ifmulc);
+	            this.get_kind(), this.get_payload(), this.get_duplicate(), this.get_seqNum(), this.ifLog,this.ifmulc);
 	    cl.setGroupName(this.groupName);
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
@@ -245,26 +286,13 @@ public class TimeStampedMessage extends Message implements Serializable{
         }
         return cl;
     }
-	public boolean equals(TimeStampedMessage t){
-	/*    
-		private int timeStamp;
-		
-		
-		private int[] timeStamps;
-		
-		private String clock_type;
+	public int hashCode() {
+        return this.timestamp.getTime() + this.origin.hashCode();
+    }
 	
-		private int size;
-		
-		private int id;
-		private boolean ifLog;
-		private boolean ifmulc;
-	*/
-		if (!this.get_source().equals(t.get_source())){
-			return false;
-		}
+	public boolean equals(TimeStampedMessage t){
 		if (!this.get_dest().equals(t.get_dest())){
-			return false;
+		    throw new RuntimeException("destination wrong");
 		}
 		if (!this.get_kind().equals(t.get_kind())){
 			return false;
@@ -272,21 +300,19 @@ public class TimeStampedMessage extends Message implements Serializable{
 		if (!this.get_payload().equals(t.get_payload())){
 			return false;
 		}
-		if (this.timeStamp != t.getTimeStamp()){
-			return false;
-		}
 		if (!this.clock_type.equals(t.getType())){
 			return false;
 		}
+		if (this.clock_type.equals("logical")) {
+		    if 
+		}
+		if (this.timeStamp != t.getTimeStamp()){
+            return false;
+        }
 		if (this.get_log()!=t.get_log()){
 			return false;
 		}
-		if (this.get_seqNum()!= t.get_seqNum()){
-			return false;
-		}
-		if (this.get_duplicate()!= t.get_duplicate()){
-			return false;
-		}
+
 		if (this.ifmulc != t.get_mult()){
 			return false;
 		}

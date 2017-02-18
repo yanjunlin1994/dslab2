@@ -33,7 +33,7 @@ public class VectorClock implements ClockService {
 	@Override
 	public void Synchronize(TimeStampedMessage msg) {
 		for (int i = 0; i < times.length; i++){
-			times[i] = Math.max(msg.getTimeStamp(i),times[i]);
+			times[i] = Math.max(msg.getVectorTimeStamp(i),times[i]);
 		}
 		//increments after taking the maximum value
 		this.times[id]++;

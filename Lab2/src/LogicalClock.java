@@ -20,7 +20,7 @@ public class LogicalClock implements ClockService {
 
 	@Override
 	public void Synchronize(TimeStampedMessage msg) {
-		time = Math.max(time, msg.getTimeStamp());
+		time = Math.max(time, msg.getLogicalTimeStamp());
 		time++;
 	}
 	public String toString(){

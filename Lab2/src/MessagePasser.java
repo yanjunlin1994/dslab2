@@ -271,29 +271,30 @@ public class MessagePasser {
      * @return
      */
     public synchronized TimeStampedMessage receive(){
+        System.out.println("[1st layer]receive()");
         TimeStampedMessage msg = null;
         if (!receiveQueue.isEmpty()){
             msg = receiveQueue.poll();
             this.clockservice.Synchronize(msg);
+            System.out.println("[1st layer]receive()" + " clock service" + this.clockservice);
             if (msg.get_log()){
                 TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
-                        "received msg","received data", true, msg.get_mult());
+                        "[RECORD TST]","[RECORD TST]", true, msg.get_mult());//just to see my time stamp
                 toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
                 sendToLog(msg);
             }
-            //System.out.println("check clockservice in receive" + "("+ clockservice +")");
         }
         return msg;
     }
     /**
-     * 
+     * Call receive().
      * @return
      */
     public TimeStampedMessage b_deliver(){
         return this.receive();
     }
     /**
-     * 
+     * Call b_deliver().
      * @return
      */
     public TimeStampedMessage r_deliver() {
@@ -356,7 +357,6 @@ public class MessagePasser {
             String temp = br.readLine();
             inputParam = temp.split("/");
             if (inputParam.length < 5) {
-                //wrong input
                 System.out.println("illegal input");
                 return null;
             }
@@ -369,7 +369,7 @@ public class MessagePasser {
                     inputParam[3].equals("T")? true:false,
                     inputParam[4].equals("T")? true:false);
             if (inputParam[4].equals("T")) {
-                newM.setGroupName(inputParam[0]);
+                newM.setGroupNameAndGroupMessageOrigin(inputParam[0], localName);
             }
             return newM;
         } catch(Exception e) {
@@ -378,4 +378,3 @@ public class MessagePasser {
         return null;
     }
 }
->>>>>>> origin/master
