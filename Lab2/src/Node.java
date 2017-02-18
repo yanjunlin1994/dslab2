@@ -5,6 +5,7 @@
  */
 public class Node {
 	private String name;
+	private int nodeID;
 	private int port;
 	private String ip;
 	private int seqN;
@@ -36,6 +37,13 @@ public class Node {
 		this.port = p;
 		return;
 	}
+	public int get_nodeID(){
+        return this.nodeID;
+    }
+    public void set_nodeID(int nid){
+        this.nodeID = nid;
+        return;
+    }
 	public String get_ip(){
 		return this.ip;
 	}

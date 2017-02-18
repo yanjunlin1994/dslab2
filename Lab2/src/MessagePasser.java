@@ -42,16 +42,8 @@ public class MessagePasser {
         this.receivedSet = new HashSet<TimeStampedMessage>();
         this.myConfig = new Configuration(configuration_filename);
         this.size = myConfig.get_NodeMap().keySet().size();
-        int counter = 0;
-        //get my id
-        for (String name : myConfig.get_NodeMap().keySet()) {
-            if (name.equals(local_name)){
-                this.id = counter;
-                System.out.println("MY ID: " + this.id);
-                break;
-            }
-            counter++;
-        }
+        System.out.println("I am " + this.myName + ", my ID is: " + myConfig.get_NodeMap().get(this.myName).get_nodeID());
+        
         /* Use the clock factory to generate clock service. */
         ClockFactory factory = new ClockFactory(this);
         this.clockservice = factory.getClockService();
@@ -116,7 +108,7 @@ public class MessagePasser {
         if (os != null) {
             try {
                 //System.out.println("[MessagePasser class: send function: using exsiting output stream.]");
-                //System.out.println("message to be send is:" + newMes);
+                System.out.println("[send]message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -129,10 +121,10 @@ public class MessagePasser {
             try {
                 sck = new Socket(he.get_ip(), he.get_port());
 //                sck = new Socket("localhost", he.get_port());
-                System.out.println("succeed");
+//                System.out.println("succeed");
                 os = new ObjectOutputStream(sck.getOutputStream());
                 myConfig.add_OSMap(newMes.get_dest(), os);
-                //System.out.println("message to be send is:" + newMes);
+                System.out.println("[send]message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 if (sck != null) {
@@ -157,6 +149,7 @@ public class MessagePasser {
         os = myConfig.get_LoggerOS();
         if (os != null) {
             try {
+                System.out.println("[sendToLog]message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 myConfig.set_LoggerOS(null);
@@ -171,6 +164,7 @@ public class MessagePasser {
                 sck = new Socket(log_IP,log_port);
                 os = new ObjectOutputStream(sck.getOutputStream());
                 myConfig.set_LoggerOS(os);
+                System.out.println("[sendToLog]message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 if (sck != null) {
@@ -291,6 +285,7 @@ public class MessagePasser {
      * @return
      */
     public TimeStampedMessage b_deliver(){
+        System.out.println("[2st layer]b_deliver()");
         return this.receive();
     }
     /**
@@ -298,17 +293,22 @@ public class MessagePasser {
      * @return
      */
     public TimeStampedMessage r_deliver() {
-        TimeStampedMessage msg  = b_deliver();
-        if (!receivedSet.contains(msg)) {// this message is received for the first time
-            receivedSet.add(msg);
-            if (!(msg.get_source().equals(this.myName))) {
-                b_multicast(msg);
-            } else {
+        System.out.println("[3st layer]r_deliver()");
+        TimeStampedMessage msg;
+        while ((msg = b_deliver()) != null) {
+            if (!receivedSet.contains(msg)) {// this message is received for the first time
+                receivedSet.add(msg);
+                if (!(msg.get_source().equals(this.myName))) {
+                    b_multicast(msg);
+                } else {
+                    System.out.println("[3st layer]r_deliver() sender receive message from sender");
+                    return msg;
+                }
+    //            myConfig.get_groupMap().get(msg.getGroupName()).addToHoldBackQ(msg);// store the message to the group holdback queue. 
+            } else if (msg.get_source().equals(this.myName)){
+                System.out.println("[3st layer]r_deliver() receive message from myself");
                 return msg;
             }
-//            myConfig.get_groupMap().get(msg.getGroupName()).addToHoldBackQ(msg);// store the message to the group holdback queue. 
-        } else if (msg.get_source().equals(this.myName)){
-            return msg;
         }
         return null;
     }

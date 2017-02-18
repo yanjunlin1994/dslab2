@@ -20,7 +20,6 @@ public class Configuration {
 	ArrayList<Rule> receiveRules = new ArrayList<Rule>();
 	HashMap<String,Node> nodeMap = new HashMap<String,Node>();
 	HashMap<String,ObjectOutputStream> OSMap = new HashMap<String,ObjectOutputStream>();
-	//TODO:
 	HashMap<String, Group> groupMap = new HashMap<String, Group>();
 	ObjectOutputStream LoggerOS;
 	Node lgr = null;
@@ -38,6 +37,7 @@ public class Configuration {
 		}
 		Yaml yaml = new Yaml();
 		Map<String, Object> data = (Map<String, Object>) yaml.load(IS); 
+		//-------------nodes-----------
 		List<HashMap<String, Object>> nodes = (List<HashMap<String, Object>> )data.get("configuration");
 		for (HashMap<String, Object> node : nodes){
 			Node newNode = new Node((String)node.get("name"), (int)node.get("port"), 
@@ -48,7 +48,8 @@ public class Configuration {
 			nodeMap.put((String)node.get("name"),newNode);	
 			
 		}
-		//TODO:
+		this.updateAllId();
+		//-------------group-----------
 		List<HashMap<String,Object>> groups = (List<HashMap<String,Object>>) data.get("groups");
 		for (HashMap<String, Object> group : groups){
 			String groupName = (String)group.get("name");
@@ -60,7 +61,7 @@ public class Configuration {
 			}
 			groupMap.put(groupName,newGroup);
 		}
-		
+		//-------------send rules-----------
 		List<HashMap<String, Object>> sRules = (List<HashMap<String, Object>> )data.get("sendRules");
 		for (HashMap<String,Object> rule : sRules){
 			Rule newRule = new Rule();
@@ -76,6 +77,7 @@ public class Configuration {
             }
 			sendRules.add(newRule);
 		}
+		//-------------receive rules-----------
 		List<HashMap<String, Object>> rRules = (List<HashMap<String, Object>> )data.get("receiveRules");
 		for (HashMap<String,Object> rule : rRules){
 			Rule newRule = new Rule();
@@ -147,4 +149,12 @@ public class Configuration {
 		}
 		return result;
 	}
+	public void updateAllId() {
+	    int counter = 0;
+	    for (String name : nodeMap.keySet()) {
+	        nodeMap.get(name).set_nodeID(counter);
+	        counter++;
+	    } 
+	}
+	
 }

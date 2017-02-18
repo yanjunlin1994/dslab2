@@ -291,6 +291,7 @@ public class TimeStampedMessage extends Message implements Serializable{
     }
 
 	public boolean equals(Object o) {
+	    System.out.println("[enter TSM:equals]");
 	    TimeStampedMessage t = (TimeStampedMessage)o;
 		if (!(this.get_dest().equals(t.get_dest()))){
 		    throw new RuntimeException("destination wrong");
