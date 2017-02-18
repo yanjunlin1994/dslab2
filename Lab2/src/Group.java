@@ -6,13 +6,14 @@ public class Group {
     private String myname;
     private int myid;
     private ArrayList<Node> members;
-    public Queue<TimeStampedMessage> holdbackQ = new LinkedBlockingQueue<>();
+    public Queue<TimeStampedMessage> holdbackQ; 
     public ClockService groupClock;
     public Group(String n) {
         this.gname = n;
         this.members = new ArrayList<Node>();
+        this.holdbackQ = new LinkedBlockingQueue<>();
     }
-    public void addMember(Node a) {
+    public void addMember(Node a) { 
         if (a != null) {
             this.members.add(a);
         }
@@ -85,7 +86,7 @@ public class Group {
     			boolean valid = true;
     			for (Node member : this.getMembers()){
     				int member_id = member.get_nodeID();
-    				if (member_id!=myid && msg_time[member_id]>groupClock.getTimeStamp(member_id)){
+    				if (member_id!=msg.getId() && msg_time[member_id]>groupClock.getTimeStamp(member_id)){
     					valid = false;
     					break;
     				}
