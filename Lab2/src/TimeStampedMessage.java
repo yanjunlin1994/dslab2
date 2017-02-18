@@ -34,6 +34,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl,boolean ifm) {
         super(s, d, k, data, dup, sn);
         this.ifLog = isl;
+        this.ifmulc = ifm;
     }
 	public void setLogicalMes(int st, String ct) {
 	    this.timeStamp = st;
