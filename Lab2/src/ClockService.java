@@ -9,4 +9,5 @@ public interface ClockService {
 	public int get_size();
 	public int get_id();
 	public String get_type();
+	
 }

@@ -183,6 +183,21 @@ public class MessagePasser {
             }   
         }   
     }
+    public void co_multicast(TimeStampedMessage msg){
+    	Group group = myConfig.get_groupMap().get((msg.getGroupName()));
+    	ClockService groupClock = group.getClock();
+    	for (int i = 0; i<size;i++){
+    		int time = groupClock.getTimeStamp(i);
+    		if (i == id){
+    			time++;
+    			groupClock.increment(i);
+    		}
+    		msg.setVectorTimeStamp(i,time);
+    	}
+    	group.setClock(groupClock);
+    	myConfig.get_groupMap().put(msg.getGroupName(),group);
+    	b_multicast(msg);
+    }
     /**
      * basic multicast
      * @param nm
