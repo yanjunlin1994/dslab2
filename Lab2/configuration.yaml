@@ -5,21 +5,30 @@
 # The local node’s name is included in this list
 configuration :
 - name : alice
-  ip   : 128.237.163.55
+  ip   : 128.237.173.226
   port : 12344
 - name : bob
-  ip   : 128.237.186.116
+  ip   : 128.237.173.226
   port : 14255
 - name : charlie
-  ip   : 128.237.163.55
+  ip   : 128.237.173.226
   port : 12998
 - name : daphnie
-  ip   : 128.237.186.116
+  ip   : 128.237.173.226
   port : 1987
 - name : Logger
-  ip   : 128.237.163.55
+  ip   : 128.237.173.226
   port : 18678
-  
+groups :
+- name : Group1
+  members :
+  - alice
+  - bob
+  - charlie
+# A single, top-level section in the YAML file
+# Group names must be unique
+# Any number of members in the group
+# As many groups as you’d like
 # This is the incoming port on which MP will listen
 # May be ephemeral for further communication as usual
 sendRules :
@@ -27,51 +36,13 @@ sendRules :
     src    : bob
     dest   : alice
     kind   : Ack
-    seqNum : 2
-  - action : delay # Ack message number 4 from bob to alice will not be sent
-    src    : daphnie
-    dest   : alice
-    kind   : Ack
-    seqNum : 0
-  - action : dropAfter # Daphnie will stop sending Reply messages after seq#6
-    kind   : Reply
-    src    : daphnie
-    seqNum : 6
-  - action : delay #
-    kind   : det
-    src    : bob
-    dest   : alice
-    seqNum : 3
-  - action : duplicate #
-    dest   : bob
-    src    : charlie
-    seqNum : 7
-  - action : duplicate #
-    kind   : dup
-    src    : bob
-    dest   : alice
-    seqNum : 5
+    seqNum : 2000
 receiveRules :
   - action : delay # Ack message number 4 from bob to alice will not be sent
     src    : bob
     dest   : alice
     kind   : Ack
-    seqNum : 2
-  - action : delay # Ack message number 4 from bob to alice will not be sent
-    src    : daphnie
-    dest   : alice
-    kind   : Ack
-    seqNum : 0
-  - action : duplicate
-    src    : charlie
-    seqNum : 3
-  - action : drop
-    src : charlie
-    seqNum : 7
-    duplicate : True
-  - action : delay
-    seqNum : 5
-    src    : daphnie
+    seqNum : 2000
 # 4th message from Charlie that anyone
 # receives will be duplicated
 # For the 8th message from Charlie, only the

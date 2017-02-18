@@ -1,0 +1,17 @@
+/.DS_Store
+/ClockFactory.class
+/ClockService.class
+/Configuration.class
+/Group.class
+/ListenFor.class
+/Listener.class
+/LogicalClock.class
+/MainTest.class
+/Message.class
+/MessagePasser.class
+/Network.class
+/Node.class
+/Receive.class
+/Rule.class
+/TimeStampedMessage.class
+/VectorClock.class

@@ -69,9 +69,7 @@ public class MessagePasser {
 	        if (newMes == null) {
 	            continue;
 	        }
-	        /* deal with node's sequence number */
-	        newMes.set_seqNum(myConfig.getNode(newMes.get_dest()).get_seqN());
-	        myConfig.getNode(newMes.get_dest()).incre_seqN();
+	       
 	        /* increment my clock */
 	        clockservice.increment();
 	        /* send a timestamped message*/
@@ -88,10 +86,23 @@ public class MessagePasser {
 	        	sendToLog(newMes);
 	        }
 	        if (newMes.get_mult()) {
+	            
 	            Group sendGroup = myConfig.groupMap.get(newMes.getGroupName());
 	            for (Node a: sendGroup.getMembers()) {
+	                
+	                
+	                
+	                
+	                
 	                TimeStampedMessage multicastMes = newMes.cloneMultiCast();
 	                multicastMes.set_dest(a.get_name());
+	                
+	                
+	                /* deal with node's sequence number */
+	                multicastMes.set_seqNum(myConfig.getNode(multicastMes.get_dest()).get_seqN());
+                    myConfig.getNode(multicastMes.get_dest()).incre_seqN();
+                    
+                    
 	                String checkResult = check(multicastMes); 
 	                if (checkResult != null) {
 	                    if (checkResult.equals("drop")) {
@@ -118,11 +129,12 @@ public class MessagePasser {
 	                        send(msg);
 	                    }
 	                }   
-	                
-	                
 	            }
 	            
 	        } else {
+	            /* deal with node's sequence number */
+	            newMes.set_seqNum(myConfig.getNode(newMes.get_dest()).get_seqN());
+	            myConfig.getNode(newMes.get_dest()).incre_seqN();
 	            String checkResult = check(newMes); 
 	            if (checkResult != null) {
 	                if (checkResult.equals("drop")) {
