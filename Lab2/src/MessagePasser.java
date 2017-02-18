@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.util.ArrayDeque;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 /**
  * MessagePasser who in charge of sending and receiving message.
  * @author Team 3
@@ -26,6 +26,7 @@ public class MessagePasser {
     private int size;
     /* my id (define the position in vector clock */
     private int id;
+    private HashSet<TimeStampedMessage> receivedSet;
 	/**
 	 * MessagePasser constructor.
 	 * initialize local name, clock name
@@ -57,8 +58,8 @@ public class MessagePasser {
         
 		Thread listen = new Thread(new Listener(myConfig, myName, receiveQueue, receiveDelayQueue));
 		listen.start(); 
-		Thread receive = new Thread(new Receive(receiveQueue, clockservice, this.myConfig));
-		receive.start(); 
+		//Thread receive = new Thread(new Receive(receiveQueue, clockservice, this.myConfig));
+		//receive.start(); 
 	}
 	
 	
@@ -318,4 +319,40 @@ public class MessagePasser {
         }
         return null;
     }
+    
+    public synchronized TimeStampedMessage receive(){
+        TimeStampedMessage msg = null;
+        if (!receiveQueue.isEmpty()){
+            msg = receiveQueue.poll();
+            this.clockservice.Synchronize(msg);
+            if (msg.get_log()){
+
+            	TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
+            			"received msg","received data", true,msg.get_mult());
+
+//            	toLogMessage.set_log(true);
+            	toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
+            	sendToLog(msg);
+            }
+            System.out.println("check clockservice in receive" + "("+ clockservice +")");
+        }
+        return msg;
+    }
+    
+    public TimeStampedMessage b_deliver(){
+    	return receive();
+    }
+    public TimeStampedMessage r_deliver(){
+    	TimeStampedMessage msg  = b_deliver();
+    	if (!receivedSet.contains(msg)){// this message is received for the first time
+    		receivedSet.add(msg);
+    		b_multicast(msg);
+    		myConfig.get_GroupMap().get(msg.getGroupName()).receive(msg);// store the message to the group holdback queue. 
+    	}
+    	else {
+    		return msg;
+    	}
+    	return null;
+    }
+    
 }

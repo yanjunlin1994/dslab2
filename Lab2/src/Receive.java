@@ -42,13 +42,10 @@ public class Receive implements Runnable{
             msg = receiveQueue.poll();
             this.clockservice.Synchronize(msg);
             if (msg.get_log()){
-<<<<<<< HEAD
-                TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
-                        "received msg","received data", true,msg.get_mult());
-=======
+
             	TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
             			"received msg","received data", true,msg.get_mult());
->>>>>>> d66f43e0c73ce9b6672decd4bdd304441a9e6b58
+
 //            	toLogMessage.set_log(true);
             	toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
             	sendToLog(msg);
