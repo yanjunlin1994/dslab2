@@ -20,6 +20,10 @@ public class VectorClock implements ClockService {
 		(this.times[id])++;
 		return;
 	}
+	public void increment(int idx){
+		(this.times[idx])++;
+		return;
+	}
 	/**
      * Returns time in my own position in array.
      */

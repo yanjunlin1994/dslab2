@@ -12,6 +12,9 @@ public class LogicalClock implements ClockService {
 	public void increment() {
 		this.time++;
 	}
+	public void increment(int ii){
+		this.time++;
+	}
 
 	@Override
 	public int getTimeStamp() {

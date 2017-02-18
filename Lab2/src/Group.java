@@ -69,16 +69,35 @@ public class Group {
         this.holdbackQ.offer(mes);
         
     }
-    public TimeStampedMessage pollFromHOldBackQ(){
+    public TimeStampedMessage pollFromHoldBackQ(){
     	int size = holdbackQ.size();
     	for (int i = 0; i<size;i++){
     		TimeStampedMessage msg = holdbackQ.poll();
-    		int[] msg_time = msg.getTimeStamps();
+    		int[] msg_time = msg.getVectorTimeStamps();
     		if (msg.getGroupMessageOrigin().equals(myname)){
-    			if (groupClock.getTimeStamp(myid))
+    			if (groupClock.getTimeStamp(myid)+1 == msg_time[myid]){
+    				groupClock.increment();
+    				return msg;
+    			}
     		}
     		
-    		if ()
+    		else if (groupClock.getTimeStamp(msg.getId())+1==msg_time[msg.getId()]){
+    			boolean valid = true;
+    			for (Node member : this.getMembers()){
+    				int member_id = member.get_nodeID();
+    				if (member_id!=myid && msg_time[member_id]>groupClock.getTimeStamp(member_id)){
+    					valid = false;
+    					break;
+    				}
+    			}
+    			if (valid){
+    				groupClock.increment(msg.getId());
+    				return msg;
+    			}
+    		}
+    		else {
+    			addToHoldBackQ(msg);
+    		}
     	}
     	return null;
     }
