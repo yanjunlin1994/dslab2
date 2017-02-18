@@ -49,13 +49,13 @@ public class Configuration {
 			
 		}
 		//TODO:
-		List<HashMap<String,Object>> groups = (List<HashMap<String,Object>>) data.get("configuration");
+		List<HashMap<String,Object>> groups = (List<HashMap<String,Object>>) data.get("groups");
 		for (HashMap<String, Object> group : groups){
-			String groupName = (String)group.get("name")
+			String groupName = (String)group.get("name");
 			Group newGroup = new Group(groupName);
-			List<String> members = (List<String>)group.get("members");
-			for (String name : members){
-				Node node = nodeMap.get(name);
+			List<Object> members = (List<Object>)group.get("members");
+			for (Object name : members){
+				Node node = nodeMap.get((String)name);
 				newGroup.addMember(node);
 			}
 			groupMap.put(groupName,newGroup);
