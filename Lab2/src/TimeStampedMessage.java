@@ -253,7 +253,7 @@ public class TimeStampedMessage extends Message implements Serializable{
                 + "[ifLog:" +  this.ifLog + "]" 
                 + "[ifmultc:" +  this.ifmulc + "]" 
                 + "[Groupname:" +  this.groupName + "]"  
-                + "[Group message origin:" +  this.groupName + "]" 
+                + "[Group message origin:" +  this.groupMessageOrigin + "]" 
                 + "[time stamp:"
                 + (this.clock_type.equals("logical") ? this.timeStamp : Arrays.toString(timeStamps))
                 + "]"
@@ -287,46 +287,43 @@ public class TimeStampedMessage extends Message implements Serializable{
         return cl;
     }
 	public int hashCode() {
-        return this.timestamp.getTime() + this.origin.hashCode();
+        return this.getMyTimeStamp() + this.groupMessageOrigin.hashCode();
     }
-	
-	public boolean equals(TimeStampedMessage t){
-		if (!this.get_dest().equals(t.get_dest())){
+
+	public boolean equals(Object o) {
+	    TimeStampedMessage t = (TimeStampedMessage)o;
+		if (!(this.get_dest().equals(t.get_dest()))){
 		    throw new RuntimeException("destination wrong");
 		}
-		if (!this.get_kind().equals(t.get_kind())){
+		if (!(this.get_kind().equals(t.get_kind()))){
 			return false;
 		}
-		if (!this.get_payload().equals(t.get_payload())){
+		if (!(this.get_payload().equals(t.get_payload()))){
 			return false;
 		}
-		if (!this.clock_type.equals(t.getType())){
+		if (!(this.clock_type.equals(t.getType()))){
 			return false;
 		}
 		if (this.clock_type.equals("logical")) {
-		    if 
+		    if (this.timeStamp != t.getLogicalTimeStamp()) {
+		        return false;
+		    }
+		} else if (this.clock_type.equals("vector")) {
+		    if (!(Arrays.equals(this.getVectorTimeStamps(), t.getVectorTimeStamps()))) {
+		        return false;
+		    }
+		} else {
+		    throw new RuntimeException("error type");    
 		}
-		if (this.timeStamp != t.getTimeStamp()){
-            return false;
-        }
-		if (this.get_log()!=t.get_log()){
-			return false;
-		}
-
 		if (this.ifmulc != t.get_mult()){
 			return false;
 		}
-		if (this.size != t.getSize()){
-			return false;
+		if (!(this.groupName.equals(t.getGroupName()))) {
+		    return false;
 		}
-		if (this.id != t.getId()){
-			return false;
-		}
-		for (int i = 0; i< size;i++){
-			if (this.getTimeStamp(i)!=t.getTimeStamp(i)){
-				return false;
-			}
-		}
+		if (!(this.groupMessageOrigin.equals(t.getGroupMessageOrigin()))) {
+            return false;
+        }
 		return true;
 	}
 
