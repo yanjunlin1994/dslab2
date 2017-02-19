@@ -65,10 +65,14 @@ public class MessagePasser {
     public void runNow(){
         while (true) {           
             TimeStampedMessage newMes = this.enterParameter(myName);
+           
             if (newMes == null) {
                 continue;
             }
-           
+            if (newMes.get_dest()=="Q"&&newMes.get_kind()=="d"){
+            	co_deliver();
+            	continue;
+            }
             /* increment my clock */
             clockservice.increment();
             if (this.myClock.equals("vector")){
@@ -85,7 +89,7 @@ public class MessagePasser {
  
             if (newMes.get_mult()) {
                 /* multicast the message */
-                b_multicast(newMes);
+                co_multicast(newMes);
             } else {
                 normal_send(newMes);        
             } 
@@ -394,4 +398,5 @@ public class MessagePasser {
         }
         return null;
     }
+
 }
