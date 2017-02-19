@@ -43,6 +43,12 @@ public class VectorClock implements ClockService {
 		this.times[id]++;
 		return;
 	}
+	public void GroupSynchronize(TimeStampedMessage msg) {
+        for (int i = 0; i < times.length; i++){
+            times[i] = Math.max(msg.getVectorTimeStamp(i),times[i]);
+        }
+        return;
+    }
 	/**
 	 * Gets ith element's time stamp.
 	 */

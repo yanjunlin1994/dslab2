@@ -25,7 +25,7 @@ public class MessagePasser {
     private int size;
     /* my id (define the position in vector clock */
     private int id;
-    private Set<TimeStampedMessage> receivedSet;
+    private HashSet<TimeStampedMessage> receivedSet;
     /**
      * MessagePasser constructor.
      * initialize local name, clock name
@@ -83,6 +83,8 @@ public class MessagePasser {
                 newMes.setLogicalMes(clockservice.getTimeStamp(), myClock);
             }
             System.out.println("check clockservice in send" + clockservice);
+            System.out.println("if multi "+ newMes.get_mult());
+            
             
             /* send to log function */
             if (newMes.get_log()){
@@ -238,6 +240,7 @@ public class MessagePasser {
         for (Node a: sendGroup.getMembers()) {
             /* clone message and set correct destination */
             TimeStampedMessage multicastMes = nm.cloneMultiCast();
+            multicastMes.set_source(this.myName);
             multicastMes.set_dest(a.get_name());
             /* deal with node's sequence number */
             multicastMes.set_seqNum(myConfig.getNode(multicastMes.get_dest()).get_seqN());
@@ -316,8 +319,15 @@ public class MessagePasser {
         TimeStampedMessage msg = null;
         if (!receiveQueue.isEmpty()){
             msg = receiveQueue.poll();
-            this.clockservice.Synchronize(msg);
-            System.out.println("[1st layer]receive()" + " clock service" + this.clockservice);
+            
+            if (!(msg.get_mult())) {
+                this.clockservice.Synchronize(msg);
+                System.out.println("------Normal message:" + msg);
+                System.out.println("[1st layer]receive()" + " clock service" + this.clockservice);
+                return null;
+            }
+           
+            
             if (msg.get_log()){
                 TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
                         "[RECORD TST]","[RECORD TST]", true, msg.get_mult());//just to see my time stamp
@@ -343,7 +353,9 @@ public class MessagePasser {
         System.out.println("[3rd layer]r_deliver()");
         TimeStampedMessage msg;
         while ((msg = b_deliver()) != null) {
-            if (!receivedSet.contains(msg)) {// this message is received for the first time
+           
+            if (!(this.contain(this.receivedSet, msg))) {// this message is received for the first time
+                System.out.println("[3st layer]r_deliver() add to set");
                 receivedSet.add(msg);
                 if (!(msg.get_source().equals(this.myName))) {
                     b_multicast(msg);
@@ -414,8 +426,9 @@ public class MessagePasser {
             TimeStampedMessage newM = new TimeStampedMessage(localName, inputParam[0],
                     inputParam[1], inputParam[2],
                     inputParam[3].equals("T")? true:false,
-                    inputParam[4].equals("T")? true:false);
-            if (inputParam[4].equals("T")) {
+                    inputParam[4].trim().equals("T")? true:false);
+            if (inputParam[4].trim().equals("T")) {
+                
                 newM.setGroupNameAndGroupMessageOrigin(inputParam[0], localName);
             }
             return newM;
@@ -423,6 +436,15 @@ public class MessagePasser {
             e.printStackTrace();
         }
         return null;
+    }
+    public boolean contain(HashSet<TimeStampedMessage> hset,TimeStampedMessage val){
+        for (TimeStampedMessage i : hset){
+            if (val.same(i)){
+                return true;
+            }
+        }
+        System.out.println("NOT CONTAIN");
+        return false;
     }
 
 }

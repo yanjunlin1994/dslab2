@@ -279,6 +279,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
 	            this.get_kind(), this.get_payload(), this.get_duplicate(), this.get_seqNum(), this.ifLog,this.ifmulc);
 	    cl.setGroupName(this.groupName);
+	    cl.setGroupMessageOrigin(this.groupMessageOrigin);
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {
@@ -286,13 +287,11 @@ public class TimeStampedMessage extends Message implements Serializable{
         }
         return cl;
     }
-	public int hashCode() {
-        return this.getMyTimeStamp() + this.groupMessageOrigin.hashCode();
-    }
+//	public int hashCode() {
+//        return this.getMyTimeStamp() + this.groupMessageOrigin.hashCode();
+//    }
 
-	public boolean equals(Object o) {
-	    System.out.println("[enter TSM:equals]");
-	    TimeStampedMessage t = (TimeStampedMessage)o;
+	public boolean same(TimeStampedMessage t) {
 		if (!(this.get_dest().equals(t.get_dest()))){
 		    throw new RuntimeException("destination wrong");
 		}

@@ -5,19 +5,19 @@
 # The local node’s name is included in this list
 configuration :
 - name : alice
-  ip   : 128.237.173.226
+  ip   : 128.237.207.82
   port : 12344
 - name : bob
-  ip   : 128.237.173.226
+  ip   : 128.237.207.82
   port : 14255
 - name : charlie
-  ip   : 128.237.173.226
+  ip   : 128.237.207.82
   port : 12998
 - name : daphnie
-  ip   : 128.237.173.226
+  ip   : 128.237.207.82
   port : 1987
 - name : Logger
-  ip   : 128.237.173.226
+  ip   : 128.237.207.82
   port : 18678
 groups :
 - name : Group1

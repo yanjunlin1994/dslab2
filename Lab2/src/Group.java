@@ -5,6 +5,7 @@ public class Group {
     private String gname;
     private String myname;
     private int myid;
+    private int selfcount;
     private ArrayList<Node> members;
     public Queue<TimeStampedMessage> holdbackQ; 
     public ClockService groupClock;
@@ -12,6 +13,7 @@ public class Group {
         this.gname = n;
         this.members = new ArrayList<Node>();
         this.holdbackQ = new LinkedBlockingQueue<>();
+        this.selfcount = 0;
     }
     public void addMember(Node a) { 
         if (a != null) {
@@ -75,12 +77,17 @@ public class Group {
     public TimeStampedMessage pollFromHoldBackQ(){
         System.out.println("[enter pollFromHoldBackQ]");
     	int size = holdbackQ.size();
+    	System.out.println("[enter pollFromHoldBackQ] size" + size);
     	for (int i = 0; i<size;i++){
     		TimeStampedMessage msg = holdbackQ.poll();
     		int[] msg_time = msg.getVectorTimeStamps();
     		if (msg.getGroupMessageOrigin().equals(myname)){
-    			if (groupClock.getTimeStamp(myid)+1 == msg_time[myid]){
-    				groupClock.increment();
+    		    System.out.println("[enter pollFromHoldBackQ] myname " + myname+ " myid: "+myid);
+    		    System.out.println("[enter pollFromHoldBackQ] gc " + selfcount);
+    		    System.out.println("[enter pollFromHoldBackQ] msgc " + msg_time[myid]);
+    			if ((this.selfcount+1) == msg_time[myid]){
+    			    this.selfcount++;
+    				//groupClock.increment();
     				return msg;
     			}
     		}
