@@ -71,8 +71,12 @@ public class MessagePasser {
                 continue;
             }
             if (newMes.get_dest().equals("Q")&&newMes.get_kind().equals("d")){
+<<<<<<< HEAD
+            	co_deliver();
+=======
                 TimeStampedMessage rmsg = co_deliver();
                 System.out.println("+++++++++" + rmsg);
+>>>>>>> origin/master
             	continue;
             }
             /* increment my clock */
