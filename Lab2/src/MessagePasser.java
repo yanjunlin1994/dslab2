@@ -70,8 +70,9 @@ public class MessagePasser {
             if (newMes == null) {
                 continue;
             }
-            if (newMes.get_dest()=="Q"&&newMes.get_kind()=="d"){
-            	co_deliver();
+            if (newMes.get_dest().equals("Q")&&newMes.get_kind().equals("d")){
+                TimeStampedMessage rmsg = co_deliver();
+                System.out.println("+++++++++" + rmsg);
             	continue;
             }
             /* increment my clock */
@@ -197,20 +198,14 @@ public class MessagePasser {
                 return msg;
             }
         }
-        for (String grp: groups.keySet()) {
-            gmsg = groups.get(grp).fetchQueuedMessage();
-            if (gmsg != null)
-                return gmsg;
-        }
-
-        while ((gmsg = R_deliver()) != null) {
-            Group group = groups.get(gmsg.getGroup());
-            group.addMessage(gmsg);
-
-            for (String grp: groups.keySet()) {
-                gmsg = groups.get(grp).fetchQueuedMessage();
-                if (gmsg != null)
-                    return gmsg;
+        while ((msg = r_deliver()) != null) {
+            Group grp = myConfig.get_groupMap().get(msg.getGroupName());
+            grp.addToHoldBackQ(msg);
+            for (Group gr: myConfig.get_groupMap().values()) {
+                TimeStampedMessage rmsg = gr.pollFromHoldBackQ(); 
+                if (rmsg != null) {
+                    return rmsg;
+                }
             }
         }
         return null;
