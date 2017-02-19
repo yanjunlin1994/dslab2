@@ -69,7 +69,7 @@ public class MessagePasser {
             if (newMes == null) {
                 continue;
             }
-            if (newMes.get_dest()=="Q"&&newMes.get_kind()=="d"){
+            if (newMes.get_dest().equals("Q")&&newMes.get_kind().equals("d")){
             	co_deliver();
             	continue;
             }
