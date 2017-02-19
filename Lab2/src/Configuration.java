@@ -135,6 +135,7 @@ public class Configuration {
 	public HashMap<String,Group> get_groupMap(){
         return this.groupMap;
     }
+	//??
 	public HashMap<String,Group> get_GroupMap(){
 		return this.groupMap;
 	}

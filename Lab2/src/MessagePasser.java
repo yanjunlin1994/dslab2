@@ -48,9 +48,10 @@ public class MessagePasser {
         /* Use the clock factory to generate clock service. */
         ClockFactory factory = new ClockFactory(this);
         this.clockservice = factory.getClockService();
-        ArrayList<Group> groups = myConfig.getGroups(myName);
-        for (Group group : groups){
-        	group.setClock(this.clockservice);
+        ArrayList<Group> groups = myConfig.getGroups(this.myName);
+        for (Group group : groups) {
+            ClockService csclone= factory.getClockService();
+        	group.setClock(csclone);
         	group.setMyname(this.myName);
         	group.setMyID(this.id);
         }
@@ -183,19 +184,49 @@ public class MessagePasser {
             }   
         }   
     }
+    public TimeStampedMessage co_deliver(){
+        System.out.println("[4th layer]co_deliver()");
+        TimeStampedMessage msg;
+        for (Group gr: myConfig.get_groupMap().values()) {
+            msg = gr.pollFromHoldBackQ();
+            if (msg != null) {
+                return msg;
+            }
+        }
+        for (String grp: groups.keySet()) {
+            gmsg = groups.get(grp).fetchQueuedMessage();
+            if (gmsg != null)
+                return gmsg;
+        }
+
+        while ((gmsg = R_deliver()) != null) {
+            Group group = groups.get(gmsg.getGroup());
+            group.addMessage(gmsg);
+
+            for (String grp: groups.keySet()) {
+                gmsg = groups.get(grp).fetchQueuedMessage();
+                if (gmsg != null)
+                    return gmsg;
+            }
+        }
+        return null;
+    }
+    /**
+     * 
+     * @param msg
+     */
     public void co_multicast(TimeStampedMessage msg){
+        System.out.println("[2nd layer]co_multicast");
     	Group group = myConfig.get_groupMap().get((msg.getGroupName()));
     	ClockService groupClock = group.getClock();
-    	for (int i = 0; i<size;i++){
+    	for (int i = 0; i<this.size;i++){
     		int time = groupClock.getTimeStamp(i);
-    		if (i == id){
+    		if (i == this.id){
     			time++;
     			groupClock.increment(i);
     		}
     		msg.setVectorTimeStamp(i,time);
     	}
-    	group.setClock(groupClock);
-    	myConfig.get_groupMap().put(msg.getGroupName(),group);
     	b_multicast(msg);
     }
     /**
@@ -203,7 +234,7 @@ public class MessagePasser {
      * @param nm
      */
     public void b_multicast(TimeStampedMessage nm) {
-        
+        System.out.println("[1st layer]b_multicast()");
         Group sendGroup = myConfig.groupMap.get(nm.getGroupName());
         for (Node a: sendGroup.getMembers()) {
             /* clone message and set correct destination */
@@ -302,7 +333,7 @@ public class MessagePasser {
      * @return
      */
     public TimeStampedMessage b_deliver(){
-        System.out.println("[2st layer]b_deliver()");
+        System.out.println("[2nd layer]b_deliver()");
         return this.receive();
     }
     /**
@@ -310,7 +341,7 @@ public class MessagePasser {
      * @return
      */
     public TimeStampedMessage r_deliver() {
-        System.out.println("[3st layer]r_deliver()");
+        System.out.println("[3rd layer]r_deliver()");
         TimeStampedMessage msg;
         while ((msg = b_deliver()) != null) {
             if (!receivedSet.contains(msg)) {// this message is received for the first time

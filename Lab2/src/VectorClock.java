@@ -17,7 +17,7 @@ public class VectorClock implements ClockService {
 	 */
 	@Override
 	public void increment() {
-		(this.times[id])++;
+		(this.times[this.id])++;
 		return;
 	}
 	public void increment(int idx){
