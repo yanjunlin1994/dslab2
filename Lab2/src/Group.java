@@ -44,10 +44,12 @@ public class Group {
         this.gname = ne;
     }
     public boolean hasMember(String n){
-    	if (members.contains(n)){
-    		return true;
-    	}
-    	else {return false;}
+        for (Node m: members) {
+            if (m.get_name().equals(n)) {
+                return true;
+            }
+        }
+    	return false;
     }
     public void setClock(ClockService s){
     	this.groupClock = s;
@@ -71,6 +73,7 @@ public class Group {
         
     }
     public TimeStampedMessage pollFromHoldBackQ(){
+        System.out.println("[enter pollFromHoldBackQ]");
     	int size = holdbackQ.size();
     	for (int i = 0; i<size;i++){
     		TimeStampedMessage msg = holdbackQ.poll();
