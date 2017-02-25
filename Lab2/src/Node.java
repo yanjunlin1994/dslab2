@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Node class.
  * A node contains its name, port, ip address and the sequence number.
@@ -9,8 +11,10 @@ public class Node {
 	private int port;
 	private String ip;
 	private int seqN;
+	private ArrayList<Group> affGroups;
 	public Node() {
         this.seqN = 0;
+        this.affGroups = new ArrayList<Group>();
     }
 	/**
 	 * Node constructor without sequence number.
@@ -64,6 +68,15 @@ public class Node {
     }
 	public int get_seqN(){
         return this.seqN;
+    }
+	/**
+     * set and get affilicated groups.
+     */
+    public ArrayList<Group> get_affGroups(){
+        return this.affGroups;
+    }
+    public void add_affGroups(Group g){
+        this.affGroups.add(g);
     }
 	
 }

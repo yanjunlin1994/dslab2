@@ -8,6 +8,7 @@ import java.util.*;
  *
  */
 public class TimeStampedMessage extends Message implements Serializable{
+    
 /* list of the variables in TimeTampedMessage class
  *    private String source;
       private String dest;
@@ -15,66 +16,61 @@ public class TimeStampedMessage extends Message implements Serializable{
       private Object payload;  
       private int seqNum;
       private boolean duplicate;
+      
       private int timeStamp;
       private int[] timeStamps;
       private String clock_type;
-      private int size;
       private int id;
-      private boolean ifLog;
-      private boolean ifmulc;
+      
+      private boolean ifLog;  
+      private boolean ifmulticast;
       private String groupName;
       private String groupMessageOrigin;
     */
+    
     /* logical timeStamp. */
 	private int timeStamp;
-	
 	/* vector timeStamp. */
 	private int[] timeStamps;
 	/* the clock's type is either vector or logical.*/
 	private String clock_type;
-	/* size of vector array.*/
-	private int size;
-	/* my index in array */
+	/* my index in vector clock array */
 	private int id;
 	private boolean ifLog;
-	private boolean ifmulc;
+	private boolean ifmulticast;
 	private String groupName;
-	private String groupMessageOrigin;
+    private String groupMessageOrigin;
 	
-	/**
-	 * Constructor using Message class's contructor.
-	 */
-	public TimeStampedMessage(String s,String d,String k,Object data, boolean isl, boolean ifm) {
+	
+	public TimeStampedMessage(String s,String d,String k,Object data, boolean ifl, boolean ifm) {
 		super(s, d, k, data);
-		this.ifLog = isl;
-		this.ifmulc = ifm;
+		this.ifLog = ifl;
+		this.ifmulticast = ifm;
 	}
 	public TimeStampedMessage(String s,String d,String k,Object data, boolean dup, int sn, boolean isl, boolean ifm) {
         super(s, d, k, data, dup, sn);
         this.ifLog = isl;
-        this.ifmulc = ifm;
+        this.ifmulticast = ifm;
     }
 	public void setLogicalMes(int st, String ct) {
 	    this.timeStamp = st;
 	    this.clock_type = ct;
 	}
 	public void setVectorMes(ClockService csv, int sz, int ID, String ct) {
-	    this.size = sz;
 	    this.id = ID;
 	    this.clock_type = ct;
 	    this.timeStamps = new int[sz];
 	    if (csv == null) {
-	        for (int i = 0; i < this.size; i++) {
+	        for (int i = 0; i < sz; i++) {
 	            this.timeStamps[i] = 0;
 	        }
 	    } else {
-	        for (int i = 0; i < this.size; i++) {
+	        for (int i = 0; i < sz; i++) {
 	            this.timeStamps[i] = csv.getTimeStamp(i);
 	        }
 	    }    
     }
 	public void setVectorMesCopy(int[] times, int sz, int ID, String ct) {
-        this.size = sz;
         this.id = ID;
         this.clock_type = ct;
         this.timeStamps = times.clone();
@@ -96,12 +92,8 @@ public class TimeStampedMessage extends Message implements Serializable{
 	    }
 		return this.clock_type;
 	}
-	public void setSize(int s){
-		this.size = s;	
-		return;
-	}
 	public int getSize(){
-		return this.size;
+		return this.timeStamps.length;
 	}
 	public void setId(int i){
 		this.id = i;
@@ -211,10 +203,10 @@ public class TimeStampedMessage extends Message implements Serializable{
         return this.groupMessageOrigin;
     }
     public void set_mult(boolean m){
-        this.ifmulc = m;
+        this.ifmulticast = m;
     }
     public boolean get_mult(){
-        return this.ifmulc;
+        return this.ifmulticast;
     }
 	/**
 	 * compare method.
@@ -251,7 +243,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 	public String toString() { 
         return  "[clock type:" +  this.clock_type + "]" 
                 + "[ifLog:" +  this.ifLog + "]" 
-                + "[ifmultc:" +  this.ifmulc + "]" 
+                + "[ifmultc:" +  this.ifmulticast + "]" 
                 + "[Groupname:" +  this.groupName + "]"  
                 + "[Group message origin:" +  this.groupMessageOrigin + "]" 
                 + "[time stamp:"
@@ -263,33 +255,32 @@ public class TimeStampedMessage extends Message implements Serializable{
 	
 	public TimeStampedMessage clone(){
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), this.ifLog,this.ifmulc);
+	            this.get_kind(), this.get_payload(), true, this.get_seqNum(), this.ifLog,this.ifmulticast);
 	    if (this.getGroupName() != null) {
 	        cl.setGroupName(this.groupName);
+	        cl.setGroupMessageOrigin(this.groupMessageOrigin);
 	    }
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {
-            cl.setVectorMesCopy(this.timeStamps, this.size, this.id, this.clock_type);
+            cl.setVectorMesCopy(this.timeStamps, this.timeStamps.length, this.id, this.clock_type);
         }
         return cl;
     }
 	public TimeStampedMessage cloneMultiCast(){
 		
 	    TimeStampedMessage cl = new TimeStampedMessage(this.get_source(),this.get_dest(), 
-	            this.get_kind(), this.get_payload(), this.get_duplicate(), this.get_seqNum(), this.ifLog,this.ifmulc);
+	            this.get_kind(), this.get_payload(), this.get_duplicate(), this.get_seqNum(), this.ifLog,this.ifmulticast);
 	    cl.setGroupName(this.groupName);
 	    cl.setGroupMessageOrigin(this.groupMessageOrigin);
         if (this.clock_type.equals("logical")) {
             cl.setLogicalMes(this.timeStamp, this.clock_type);
         } else if (this.clock_type.equals("vector")) {
-            cl.setVectorMesCopy(this.timeStamps, this.size, this.id, this.clock_type);
+            cl.setVectorMesCopy(this.timeStamps, this.timeStamps.length, this.id, this.clock_type);
         }
         return cl;
     }
-//	public int hashCode() {
-//        return this.getMyTimeStamp() + this.groupMessageOrigin.hashCode();
-//    }
+
 
 	public boolean same(TimeStampedMessage t) {
 		if (!(this.get_dest().equals(t.get_dest()))){
@@ -315,7 +306,7 @@ public class TimeStampedMessage extends Message implements Serializable{
 		} else {
 		    throw new RuntimeException("error type");    
 		}
-		if (this.ifmulc != t.get_mult()){
+		if (this.ifmulticast != t.get_mult()){
 			return false;
 		}
 		if (!(this.groupName.equals(t.getGroupName()))) {

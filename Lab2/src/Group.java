@@ -20,6 +20,11 @@ public class Group {
             this.members.add(a);
         }
     }
+    public void setmyNameIDClock(ClockService csclone, String mn, int ID) {
+        this.groupClock = csclone;
+        this.myname = mn;
+        this.myid = ID;
+    }
     /**
      * update the size of group.
      * according to the number of members in the group.
@@ -77,17 +82,17 @@ public class Group {
     public TimeStampedMessage pollFromHoldBackQ(){
         System.out.println("[enter pollFromHoldBackQ]");
     	int size = holdbackQ.size();
-    	System.out.println("[enter pollFromHoldBackQ] size" + size);
+//    	System.out.println("[enter pollFromHoldBackQ] size" + size);
     	for (int i = 0; i<size;i++){
     		TimeStampedMessage msg = holdbackQ.poll();
+
     		int[] msg_time = msg.getVectorTimeStamps();
     		if (msg.getGroupMessageOrigin().equals(myname)){
-    		    System.out.println("[enter pollFromHoldBackQ] myname " + myname+ " myid: "+myid);
-    		    System.out.println("[enter pollFromHoldBackQ] gc " + selfcount);
-    		    System.out.println("[enter pollFromHoldBackQ] msgc " + msg_time[myid]);
+//    		    System.out.println("[enter pollFromHoldBackQ] myname " + myname+ " myid: "+myid);
+//    		    System.out.println("[enter pollFromHoldBackQ] gc " + selfcount);
+//    		    System.out.println("[enter pollFromHoldBackQ] msgc " + msg_time[myid]);
     			if ((this.selfcount+1) == msg_time[myid]){
     			    this.selfcount++;
-    				//groupClock.increment();
     				return msg;
     			}
     		}
@@ -97,7 +102,9 @@ public class Group {
     			for (Node member : this.getMembers()){
     				int member_id = member.get_nodeID();
     				if (member_id!=msg.getId() && msg_time[member_id]>groupClock.getTimeStamp(member_id)){
+    				    //whether add back to hold back Q??
     					valid = false;
+    					addToHoldBackQ(msg);
     					break;
     				}
     			}

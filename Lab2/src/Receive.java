@@ -40,7 +40,7 @@ public class Receive implements Runnable{
         TimeStampedMessage msg = null;
         if (!receiveQueue.isEmpty()){
             msg = receiveQueue.poll();
-            this.clockservice.Synchronize(msg);
+            
 
             if (msg.get_log()){
                 TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),

@@ -51,9 +51,7 @@ public class MessagePasser {
         ArrayList<Group> groups = myConfig.getGroups(this.myName);
         for (Group group : groups) {
             ClockService csclone= factory.getClockService();
-        	group.setClock(csclone);
-        	group.setMyname(this.myName);
-        	group.setMyID(this.id);
+            group.setmyNameIDClock(csclone, this.myName, this.id);
         }
         Thread listen = new Thread(new Listener(myConfig, myName, receiveQueue, receiveDelayQueue));
         listen.start(); 
@@ -70,12 +68,19 @@ public class MessagePasser {
             if (newMes == null) {
                 continue;
             }
-            if (newMes.get_dest().equals("Q")&&newMes.get_kind().equals("d")){
-
+            /* TO RECEIVE */
+            if (newMes.get_dest().equals("R")&&newMes.get_kind().equals("R")){
                 TimeStampedMessage rmsg = co_deliver();
-                System.out.println("+++++++++" + rmsg);
+                System.out.println("+++++++++++++++++" + rmsg);
+                if (rmsg != null && rmsg.get_log()){
+                    TimeStampedMessage toLogMessage =  new TimeStampedMessage(rmsg.get_source(),rmsg.get_dest(),
+                            "[LOG]","[LOG]", true, rmsg.get_mult());//just to see my time stamp
+                    toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
+                    sendToLog(rmsg);
+                }
             	continue;
             }
+            /* TO SEND */
             /* increment my clock */
             clockservice.increment();
             if (this.myClock.equals("vector")){
@@ -83,15 +88,12 @@ public class MessagePasser {
             } else if (this.myClock.equals("logical")) {
                 newMes.setLogicalMes(clockservice.getTimeStamp(), myClock);
             }
-            System.out.println("check clockservice in send" + clockservice);
-            System.out.println("if multi "+ newMes.get_mult());
-            
+            System.out.println("check my clockservice in send" + clockservice);
             
             /* send to log function */
             if (newMes.get_log()){
                 sendToLog(newMes);
             }
- 
             if (newMes.get_mult()) {
                 /* multicast the message */
                 co_multicast(newMes);
@@ -108,7 +110,6 @@ public class MessagePasser {
      * @param data the data in message
      */
     private void send(TimeStampedMessage newMes) {
-       // System.out.println("[MessagePasser class: send function]");
         if (newMes == null) {
             System.out.println("Message is empty, can't send it");
             return;
@@ -117,21 +118,18 @@ public class MessagePasser {
         os = myConfig.get_OSMap(newMes.get_dest());
         if (os != null) {
             try {
-                //System.out.println("[MessagePasser class: send function: using exsiting output stream.]");
                 System.out.println("[send]message to be send is:" + newMes);
                 os.writeObject(newMes);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            //System.out.println("[MessagePasser class: send function: create new output stream...]");
             Node me = myConfig.getNode(myName);
             Node he = myConfig.getNode(newMes.get_dest());
             Socket sck = null;
             try {
-                sck = new Socket(he.get_ip(), he.get_port());
-//                sck = new Socket("localhost", he.get_port());
-//                System.out.println("succeed");
+//                sck = new Socket(he.get_ip(), he.get_port());
+                sck = new Socket("localhost", he.get_port());
                 os = new ObjectOutputStream(sck.getOutputStream());
                 myConfig.add_OSMap(newMes.get_dest(), os);
                 System.out.println("[send]message to be send is:" + newMes);
@@ -145,8 +143,7 @@ public class MessagePasser {
                     }
                 } else {
                     e.printStackTrace();
-                }
-                
+                }   
             }   
         }   
     }
@@ -187,8 +184,7 @@ public class MessagePasser {
                     }
                 } else {
                     e.printStackTrace();
-                }
-                
+                } 
             }   
         }   
     }
@@ -214,16 +210,18 @@ public class MessagePasser {
         return null;
     }
     /**
-     * 
-     * @param msg
+     * casual ordering multicast
      */
     public void co_multicast(TimeStampedMessage msg){
         System.out.println("[2nd layer]co_multicast");
     	Group group = myConfig.get_groupMap().get((msg.getGroupName()));
     	ClockService groupClock = group.getClock();
+    	/* use the group clock to generate the clock in message.
+    	 * increment my position value in group clock. 
+    	 */
     	for (int i = 0; i<this.size;i++){
     		int time = groupClock.getTimeStamp(i);
-    		if (i == this.id){
+    		if (i == this.id) {
     			time++;
     			groupClock.increment(i);
     		}
@@ -233,7 +231,6 @@ public class MessagePasser {
     }
     /**
      * basic multicast
-     * @param nm
      */
     public void b_multicast(TimeStampedMessage nm) {
         System.out.println("[1st layer]b_multicast()");
@@ -320,20 +317,11 @@ public class MessagePasser {
         TimeStampedMessage msg = null;
         if (!receiveQueue.isEmpty()){
             msg = receiveQueue.poll();
-            
             if (!(msg.get_mult())) {
                 this.clockservice.Synchronize(msg);
-                System.out.println("------Normal message:" + msg);
-                System.out.println("[1st layer]receive()" + " clock service" + this.clockservice);
+                System.out.println("++++++++Normal message:" + msg);
+                System.out.println("[1st layer]receive() Normal message" + " clock service" + this.clockservice);
                 return null;
-            }
-           
-            
-            if (msg.get_log()){
-                TimeStampedMessage toLogMessage =  new TimeStampedMessage(msg.get_source(),msg.get_dest(),
-                        "[RECORD TST]","[RECORD TST]", true, msg.get_mult());//just to see my time stamp
-                toLogMessage.setVectorMes(clockservice, clockservice.get_size(), clockservice.get_id(), clockservice.get_type());
-                sendToLog(msg);
             }
         }
         return msg;
@@ -354,7 +342,6 @@ public class MessagePasser {
         System.out.println("[3rd layer]r_deliver()");
         TimeStampedMessage msg;
         while ((msg = b_deliver()) != null) {
-           
             if (!(this.contain(this.receivedSet, msg))) {// this message is received for the first time
                 System.out.println("[3st layer]r_deliver() add to set");
                 receivedSet.add(msg);
@@ -363,8 +350,7 @@ public class MessagePasser {
                 } else {
                     System.out.println("[3st layer]r_deliver() sender receive message from sender");
                     return msg;
-                }
-    //            myConfig.get_groupMap().get(msg.getGroupName()).addToHoldBackQ(msg);// store the message to the group holdback queue. 
+                } 
             } else if (msg.get_source().equals(this.myName)){
                 System.out.println("[3st layer]r_deliver() receive message from myself");
                 return msg;
@@ -379,7 +365,7 @@ public class MessagePasser {
      * @return actions should be taken.
      */
     private String check(TimeStampedMessage newMes) {
-        System.out.println("[check send message]");
+//        System.out.println("[check send rule]");
         for (Rule r : myConfig.sendRules) {
             int result = r.match(newMes);
             if (result == 1) {
@@ -395,28 +381,20 @@ public class MessagePasser {
         }
         return null;
     }
-    public String getClock(){
-        return this.myClock;
-    }
-    public int getSize(){
-        return this.size;
-    }
-    public int getId(){
-        return this.id;
-    }
+    
     /**
      * Construct the message from input parameters.
      * @return the message constructed from input parameters.
      */
     private TimeStampedMessage enterParameter(String localName) {
-        System.out.println("destination/kind/content/iflog/ifmulticast");
+        System.out.println(" > destination/kind/content/iflog/ifmulticast");
         InputStreamReader isrd = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(isrd);
         String[] inputParam = null;
         try {
             String temp = br.readLine();
             inputParam = temp.split("/");
-            if (inputParam.length < 5) {
+            if (inputParam.length != 5) {
                 System.out.println("illegal input");
                 return null;
             }
@@ -429,7 +407,6 @@ public class MessagePasser {
                     inputParam[3].equals("T")? true:false,
                     inputParam[4].trim().equals("T")? true:false);
             if (inputParam[4].trim().equals("T")) {
-                
                 newM.setGroupNameAndGroupMessageOrigin(inputParam[0], localName);
             }
             return newM;
@@ -438,14 +415,29 @@ public class MessagePasser {
         }
         return null;
     }
+    /**
+     * 
+     * @param hset
+     * @param val
+     * @return
+     */
     public boolean contain(HashSet<TimeStampedMessage> hset,TimeStampedMessage val){
         for (TimeStampedMessage i : hset){
             if (val.same(i)){
                 return true;
             }
         }
-        System.out.println("NOT CONTAIN");
+        System.out.println("NOT CONTAIN, it is a brand new message");
         return false;
+    }
+    public String getClock(){
+        return this.myClock;
+    }
+    public int getSize(){
+        return this.size;
+    }
+    public int getId(){
+        return this.id;
     }
 
 }
